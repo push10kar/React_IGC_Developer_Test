@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   LogOut,
   Maximize2,
+  Minimize2,
   ChevronDown,
   User,
   Check,
@@ -26,43 +27,119 @@ import {
 
 interface IdimsNavbarProps {
   onSearchChange?: (query: string) => void;
+  searchQuery?: string;
   activeNav: string;
   onNavChange: (route: string) => void;
 }
 
 export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
   onSearchChange,
+  searchQuery = "",
   activeNav,
   onNavChange,
 }) => {
+  const navSearchInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        navSearchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
   const [search, setSearch] = useState("");
   const [isBranchOpen, setIsBranchOpen] = useState(false);
   const [activeBranch, setActiveBranch] = useState("All branch");
   const [branchTag, setBranchTag] = useState("ALL");
-  const [isBrandTheme, setIsBrandTheme] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isBrandTheme, setIsBrandTheme] = useState(
+    () =>
+      typeof document !== "undefined" &&
+      document.documentElement.classList.contains("brand"),
+  );
+  const [isDarkMode, setIsDarkMode] = useState(
+    () =>
+      typeof document !== "undefined" &&
+      document.documentElement.classList.contains("dark"),
+  );
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [notificationsCount] = useState(3);
   const [inboxCount] = useState(5);
   const [cartCount] = useState(2);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Sync Dark Mode & Brand Theme class on body
   useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.add("idims-dark");
+    const handleFullscreenChange = () => {
+      const fsElement =
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+      setIsFullscreen(!!fsElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    const doc = document as any;
+    const docEl = document.documentElement as any;
+
+    const fsElement =
+      doc.fullscreenElement ||
+      doc.webkitFullscreenElement ||
+      doc.mozFullScreenElement ||
+      doc.msFullscreenElement;
+
+    if (!fsElement) {
+      const reqFs =
+        docEl.requestFullscreen ||
+        docEl.webkitRequestFullscreen ||
+        docEl.mozRequestFullScreen ||
+        docEl.msRequestFullscreen;
+
+      if (reqFs) {
+        reqFs.call(docEl).catch((err: any) => {
+          console.warn("Fullscreen request denied or not supported:", err);
+        });
+      }
     } else {
-      document.body.classList.remove("idims-dark");
+      const exitFs =
+        doc.exitFullscreen ||
+        doc.webkitExitFullscreen ||
+        doc.mozCancelFullScreen ||
+        doc.msExitFullscreen;
+
+      if (exitFs) {
+        exitFs.call(doc).catch((err: any) => {
+          console.warn("Exit fullscreen failed:", err);
+        });
+      }
     }
+  };
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("idims-theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
 
   useEffect(() => {
-    if (isBrandTheme) {
-      document.body.classList.add("idims-brand");
-    } else {
-      document.body.classList.remove("idims-brand");
-    }
+    document.documentElement.classList.toggle("brand", isBrandTheme);
+    localStorage.setItem("idims-brand", isBrandTheme ? "1" : "0");
   }, [isBrandTheme]);
 
   const handleSearchChange = (val: string) => {
@@ -111,7 +188,14 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
           <div className="idims-nav-row idims-row-top">
             {/* LOGO */}
             <div className="flex items-center gap-3">
-              <a href="#" className="idims-logo" onClick={(e) => { e.preventDefault(); onNavChange("p2p"); }}>
+              <a
+                href="#"
+                className="idims-logo"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavChange("p2p");
+                }}
+              >
                 <img
                   src="/download.png"
                   alt="IGC Logo"
@@ -125,13 +209,17 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
               <div className="idims-search">
                 <Search className="w-4 h-4 idims-search-ico" />
                 <input
+                  ref={navSearchInputRef}
                   type="text"
-                  placeholder="Search modules, contracts, parties, documents..."
-                  value={search}
-                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Search targets by ID, title, product or HSN..."
+                  value={searchQuery || search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    handleSearchChange(e.target.value);
+                  }}
                   className="idims-search-input"
                 />
-                <span className="idims-search-kbd">⌘K</span>
+                <kbd className="idims-search-kbd">⌘K</kbd>
               </div>
             </div>
 
@@ -159,7 +247,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
 
                 {isBranchOpen && (
                   <div className="idims-branch-panel">
-                    <div className="px-4 py-2.5 bg-[#F8FAFC] border-b border-[#E2E8F0] text-[10px] font-extrabold tracking-wider text-[#64748B] uppercase">
+                    <div className="px-4 py-2.5 bg-muted border-b border-border text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                       Switch Active Organization Branch
                     </div>
                     <div className="p-1.5 space-y-1">
@@ -175,22 +263,24 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                             activeBranch === b.name ? "active" : ""
                           }`}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-[#E0FBFF] text-[#0891B2] font-black text-xs flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 rounded-md bg-muted text-foreground font-semibold text-xs flex items-center justify-center flex-shrink-0">
                             {b.name.substring(0, 2).toUpperCase()}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-[#0F172A] truncate">
+                              <span className="text-xs font-medium text-foreground truncate">
                                 {b.name}
                               </span>
-                              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-[#ECFEFF] text-[#0891B2] border border-[#A5F3FC]">
+                              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground border border-border">
                                 {b.tag}
                               </span>
                             </div>
-                            <p className="text-[10px] text-[#64748B]">{b.sub}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {b.sub}
+                            </p>
                           </div>
                           {activeBranch === b.name && (
-                            <Check className="w-4 h-4 text-[#0891B2] flex-shrink-0" />
+                            <Check className="w-4 h-4 text-foreground flex-shrink-0" />
                           )}
                         </div>
                       ))}
@@ -200,8 +290,11 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
               </div>
 
               {/* THEME TOGGLE */}
-              <div className="idims-theme-switch" title="Toggle Brand Theme Accent">
-                <span className="text-[11px] font-extrabold text-[#64748B]">
+              <div
+                className="idims-theme-switch"
+                title="Toggle Brand Theme Accent"
+              >
+                <span className="text-[11px] font-medium text-muted-foreground">
                   {isBrandTheme ? "Brand (IGC)" : "Default"}
                 </span>
                 <button
@@ -215,55 +308,55 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="idims-action-btn"
-                title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                title={
+                  isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"
+                }
               >
                 {isDarkMode ? (
-                  <Sun className="w-4 h-4 text-[#F59E0B]" />
+                  <Sun className="w-4 h-4" />
                 ) : (
-                  <Moon className="w-4 h-4 text-[#64748B]" />
+                  <Moon className="w-4 h-4" />
                 )}
               </button>
 
               {/* ACTION ICONS: Fullscreen, Inbox, Bell, Cart */}
               <div className="idims-actions">
                 <button
-                  onClick={() => {
-                    if (!document.fullscreenElement) {
-                      document.documentElement.requestFullscreen();
-                    } else {
-                      document.exitFullscreen();
-                    }
-                  }}
+                  onClick={toggleFullscreen}
                   className="idims-action-btn"
-                  title="Toggle Fullscreen Mode"
+                  title={isFullscreen ? "Exit Fullscreen" : "Toggle Fullscreen Mode"}
                 >
-                  <Maximize2 className="w-4 h-4" />
+                  {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </button>
 
                 {/* INBOX ICON BEFORE BELL */}
                 <button className="idims-action-btn" title="Inbox & Messages">
                   <Mail className="w-4 h-4" />
-                  {inboxCount > 0 && <span className="idims-action-badge bg-[#0891B2]" />}
+                  {inboxCount > 0 && (
+                    <span className="idims-action-badge" />
+                  )}
                 </button>
 
                 {/* BELL ICON */}
                 <button className="idims-action-btn" title="Notifications">
                   <Bell className="w-4 h-4" />
-                  {notificationsCount > 0 && <span className="idims-action-badge" />}
+                  {notificationsCount > 0 && (
+                    <span className="idims-action-badge" />
+                  )}
                 </button>
 
                 {/* CART ICON AFTER BELL */}
                 <button className="idims-action-btn" title="Requisition Cart">
                   <ShoppingCart className="w-4 h-4" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#0891B2] text-white text-[9px] font-black flex items-center justify-center border border-white">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold flex items-center justify-center border border-background">
                       {cartCount}
                     </span>
                   )}
                 </button>
               </div>
 
-              <div className="w-[1px] h-6 bg-[#E2E8F0]" />
+              <div className="w-px h-6 bg-border" />
 
               {/* PROFILE DROPDOWN TRIGGER */}
               <div className="idims-profile-wrap">
@@ -275,41 +368,43 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                   }}
                   className="idims-profile-btn"
                 >
-                  <div className="idims-avatar">PS</div>
-                  <span className="idims-profile-name">Pushkar Sharma</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-[#64748B]" />
+                  <div className="idims-avatar">RM</div>
+                  <span className="idims-profile-name">Rajesh Meshram</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
 
                 {isProfileOpen && (
                   <div className="idims-profile-panel">
                     <div className="idims-profile-head">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-black text-sm text-white">
-                          PS
+                        <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
+                          RM
                         </div>
                         <div>
-                          <h4 className="font-extrabold text-sm text-white">
-                            Pushkar Sharma
+                          <h4 className="font-semibold text-sm text-foreground">
+                            Rajesh Meshram
                           </h4>
-                          <p className="text-[11px] text-white/80 font-medium">
+                          <p className="text-[11px] text-muted-foreground font-medium">
                             Senior React / Fullstack Engineer
                           </p>
                         </div>
                       </div>
                     </div>
-                    <div className="p-2 divide-y divide-[#F1F5F9]">
+                    <div className="p-2 divide-y divide-border">
                       <div className="py-1">
                         <button
                           onClick={() => setIsProfileOpen(false)}
-                          className="w-full text-left px-3 py-2 text-xs font-bold text-[#334155] hover:bg-[#F8FAFC] rounded-lg flex items-center gap-2"
+                          className="w-full text-left px-3 py-2 text-xs font-medium text-foreground hover:bg-accent rounded-md flex items-center gap-2"
                         >
-                          <User className="w-4 h-4 text-[#0891B2]" /> User Profile & Settings
+                          <User className="w-4 h-4 text-muted-foreground" /> User
+                          Profile & Settings
                         </button>
                         <button
                           onClick={() => setIsProfileOpen(false)}
-                          className="w-full text-left px-3 py-2 text-xs font-bold text-[#334155] hover:bg-[#F8FAFC] rounded-lg flex items-center gap-2"
+                          className="w-full text-left px-3 py-2 text-xs font-medium text-foreground hover:bg-accent rounded-md flex items-center gap-2"
                         >
-                          <ShieldCheck className="w-4 h-4 text-[#0891B2]" /> Role Permissions & Access
+                          <ShieldCheck className="w-4 h-4 text-muted-foreground" />{" "}
+                          Role Permissions & Access
                         </button>
                       </div>
                       <div className="pt-1">
@@ -318,7 +413,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                             setIsProfileOpen(false);
                             setIsLogoutModalOpen(true);
                           }}
-                          className="w-full text-left px-3 py-2 text-xs font-bold text-[#EF4444] hover:bg-[#FEF2F2] rounded-lg flex items-center gap-2"
+                          className="w-full text-left px-3 py-2 text-xs font-medium text-destructive hover:bg-accent rounded-md flex items-center gap-2"
                         >
                           <LogOut className="w-4 h-4" /> Sign Out of IDIMS
                         </button>
@@ -419,7 +514,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                 >
                   <ShoppingCart className="w-4 h-4 idims-ico" />
                   <span>Procure to Pay (P2P)</span>
-                  <span className="ml-1 text-[9px] font-black px-1.5 py-0.2 bg-[#ECFEFF] text-[#0891B2] rounded-full border border-[#A5F3FC]">
+                  <span className="ml-1 text-[9px] font-semibold px-1.5 py-0.5 bg-muted text-muted-foreground rounded-full border border-border">
                     ACTIVE
                   </span>
                   <ChevronDown className="w-3 h-3 dd-chev" />
@@ -427,7 +522,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
 
                 {activeDropdown === "p2p" && (
                   <div className="idims-dropdown p-3 w-80 space-y-1">
-                    <div className="px-3 py-1.5 text-[10px] font-black uppercase text-[#0891B2] tracking-wider border-b border-[#E0FBFF] mb-1">
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase text-muted-foreground tracking-wider border-b border-border mb-1">
                       P2P Sourcing Modules
                     </div>
                     <a
@@ -437,17 +532,18 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                         onNavChange("p2p");
                         setActiveDropdown(null);
                       }}
-                      className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#ECFEFF] transition-colors bg-[#F0FDFF] border border-[#A5F3FC]"
+                      className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-accent transition-colors bg-muted/50 border border-border"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-linear-to-tr from-[#0891B2] to-[#22D3EE] text-white flex items-center justify-center font-bold flex-shrink-0">
+                      <div className="w-8 h-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-medium flex-shrink-0">
                         <Package className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-black text-[#0C4A6E]">
+                        <div className="text-xs font-semibold text-foreground">
                           Bulk Sourcing Management
                         </div>
-                        <p className="text-[10px] text-[#0E7490] mt-0.5">
-                          Line-item target specs & mapped vendor price negotiations.
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          Line-item target specs & mapped vendor price
+                          negotiations.
                         </p>
                       </div>
                     </a>
@@ -455,17 +551,18 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                     <a
                       href="#"
                       onClick={(e) => e.preventDefault()}
-                      className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors opacity-75"
+                      className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-accent transition-colors opacity-75"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] text-[#64748B] flex items-center justify-center font-bold flex-shrink-0">
+                      <div className="w-8 h-8 rounded-md bg-muted text-muted-foreground flex items-center justify-center font-medium flex-shrink-0">
                         <ShoppingCart className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-[#334155]">
+                        <div className="text-xs font-medium text-foreground">
                           Purchase Orders & Invoicing
                         </div>
-                        <p className="text-[10px] text-[#94A3B8] mt-0.5">
-                          PO releases, 3-way matching & automated payment release.
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          PO releases, 3-way matching & automated payment
+                          release.
                         </p>
                       </div>
                     </a>
@@ -493,10 +590,10 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
 
                 {activeDropdown === "gts" && (
                   <div className="idims-dropdown p-3 w-72 space-y-1">
-                    <div className="px-3 py-1.5 text-[10px] font-black uppercase text-[#0891B2] tracking-wider border-b border-[#E0FBFF] mb-1">
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase text-muted-foreground tracking-wider border-b border-border mb-1">
                       Trade & Compliance Docs
                     </div>
-                    <div className="p-2 text-xs text-[#64748B]">
+                    <div className="p-2 text-xs text-muted-foreground">
                       Customs, Bills of Lading & Export Compliance Vault.
                     </div>
                   </div>
@@ -544,23 +641,24 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
 
       {/* LOGOUT CONFIRMATION MODAL */}
       {isLogoutModalOpen && (
-        <div className="fixed inset-0 z-150 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs">
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#FEF2F2] border border-[#FEE2E2] text-[#EF4444] flex items-center justify-center mx-auto">
+        <div className="fixed inset-0 z-150 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-card text-card-foreground border border-border rounded-lg p-6 max-w-md w-full shadow-lg space-y-4">
+            <div className="w-12 h-12 rounded-lg bg-muted border border-border text-foreground flex items-center justify-center mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="text-base font-black text-[#0F172A]">
+              <h3 className="text-base font-semibold text-foreground">
                 Confirm Sign Out
               </h3>
-              <p className="text-xs text-[#64748B]">
-                Are you sure you want to end your current IDIMS Bulk Sourcing session?
+              <p className="text-xs text-muted-foreground">
+                Are you sure you want to end your current IDIMS Bulk Sourcing
+                session?
               </p>
             </div>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setIsLogoutModalOpen(false)}
-                className="flex-1 py-2.5 rounded-xl border border-[#CBD5E1] text-xs font-bold text-[#475569] hover:bg-[#F8FAFC]"
+                className="flex-1 py-2.5 rounded-md border border-input text-xs font-medium text-foreground hover:bg-accent"
               >
                 Cancel
               </button>
@@ -569,7 +667,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                   setIsLogoutModalOpen(false);
                   alert("Logged out of IDIMS Enterprise");
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-[#EF4444] text-white text-xs font-black shadow-md hover:bg-[#DC2626]"
+                className="flex-1 py-2.5 rounded-md bg-destructive text-destructive-foreground text-xs font-semibold hover:opacity-90"
               >
                 Sign Out
               </button>

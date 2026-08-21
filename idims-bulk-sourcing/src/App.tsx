@@ -10,6 +10,7 @@ import type { SourcingTarget } from "./types/sourcing";
 
 export const App: React.FC = () => {
   const [activeNav, setActiveNav] = useState("p2p");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
   const [activeTarget, setActiveTarget] = useState<SourcingTarget | null>(null);
@@ -28,6 +29,8 @@ export const App: React.FC = () => {
       case "p2p":
         return (
           <TargetDashboard
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
             onOpenAssignModal={() => setIsAssignModalOpen(true)}
             onOpenMappingModal={handleOpenMappingModal}
           />
@@ -100,6 +103,8 @@ export const App: React.FC = () => {
       default:
         return (
           <TargetDashboard
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
             onOpenAssignModal={() => setIsAssignModalOpen(true)}
             onOpenMappingModal={handleOpenMappingModal}
           />
@@ -109,8 +114,13 @@ export const App: React.FC = () => {
 
   return (
     <SourcingProvider>
-      <div className="min-h-screen bg-[#F4F6FB] flex flex-col font-sans">
-        <IdimsNavbar activeNav={activeNav} onNavChange={(route) => setActiveNav(route)} />
+      <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+        <IdimsNavbar
+          activeNav={activeNav}
+          onNavChange={(route) => setActiveNav(route)}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
 
         <main className="max-w-7xl w-full mx-auto p-6 flex-1">
           {renderContent()}

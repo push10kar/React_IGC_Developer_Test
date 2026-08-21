@@ -44,7 +44,7 @@ const SourcingContext = createContext<SourcingContextType | undefined>(
 export const SourcingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [currentUser] = useState<string>("Pushkar Sharma");
+  const [currentUser] = useState<string>("Rajesh Meshram");
   const [suppliers] = useState<Supplier[]>(INITIAL_SUPPLIERS);
   const [targets, setTargets] = useState<SourcingTarget[]>(INITIAL_TARGETS);
 

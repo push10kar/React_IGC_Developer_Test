@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -17,18 +17,47 @@ import type { SourcingTarget } from "../types/sourcing";
 interface Props {
   onOpenAssignModal: () => void;
   onOpenMappingModal: (target: SourcingTarget, lineId?: string) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export const TargetDashboard: React.FC<Props> = ({
   onOpenAssignModal,
   onOpenMappingModal,
+  searchQuery: externalSearchQuery,
+  onSearchChange: externalOnSearchChange,
 }) => {
   const { targets, stats, currentUser } = useSourcing();
   const [activeTab, setActiveTab] = useState<"ALL" | "ASSIGNED">("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "ALL" | "In Progress" | "Completed"
   >("ALL");
+
+  const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
+  const setSearchQuery = (val: string) => {
+    if (externalOnSearchChange) {
+      externalOnSearchChange(val);
+    } else {
+      setInternalSearchQuery(val);
+    }
+  };
+
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const filteredTargets = useMemo(() => {
     return targets.filter((target) => {
@@ -60,22 +89,22 @@ export const TargetDashboard: React.FC<Props> = ({
 
   return (
     <div className="space-y-4">
-      <div className="bg-white border border-[#D6EEF5] rounded-2xl p-3.5 shadow-sm flex flex-wrap justify-between items-center gap-4">
-        <div className="inline-flex bg-[#EEF7FA] border border-[#D8EEF4] p-1 rounded-xl">
+      <div className="bg-card text-card-foreground border border-border rounded-lg p-3.5 shadow-sm flex flex-wrap justify-between items-center gap-4">
+        <div className="inline-flex bg-muted border border-border p-1 rounded-lg">
           <button
             onClick={() => setActiveTab("ALL")}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-md text-xs font-semibold transition-colors flex items-center gap-2 ${
               activeTab === "ALL"
-                ? "bg-linear-to-r from-[#22D3EE] via-[#0891B2] to-[#0E7490] text-white shadow-sm" 
-                : "text-[#5B7585] hover:text-[#0E7490]"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <span>All Targets</span>
             <span
-              className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                 activeTab === "ALL"
-                  ? "bg-white/25 text-white"
-                  : "bg-[#E0FBFF] text-[#0E7490]"
+                  ? "bg-primary-foreground/20 text-primary-foreground"
+                  : "bg-background text-foreground"
               }`}
             >
               {stats.totalTargets}
@@ -84,18 +113,18 @@ export const TargetDashboard: React.FC<Props> = ({
 
           <button
             onClick={() => setActiveTab("ASSIGNED")}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-md text-xs font-semibold transition-colors flex items-center gap-2 ${
               activeTab === "ASSIGNED"
-                ? "bg-linear-to-r from-[#22D3EE] via-[#0891B2] to-[#0E7490] text-white shadow-sm" 
-                : "text-[#5B7585] hover:text-[#0E7490]"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <span>Assigned to Me</span>
             <span
-              className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                 activeTab === "ASSIGNED"
-                  ? "bg-white/25 text-white"
-                  : "bg-[#E0FBFF] text-[#0E7490]"
+                  ? "bg-primary-foreground/20 text-primary-foreground"
+                  : "bg-background text-foreground"
               }`}
             >
               {stats.assignedTargets}
@@ -105,28 +134,33 @@ export const TargetDashboard: React.FC<Props> = ({
 
         <div className="flex items-center gap-3 flex-1 max-w-xl">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94B2BF]" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search targets by ID, title, product name or HSN..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#F7FDFE] border border-[#D8EEF4] rounded-xl pl-10 pr-9 py-2 text-xs text-[#0F172A] focus:outline-none focus:border-[#22D3EE] focus:bg-white transition-all"
+              className="w-full bg-background border border-input rounded-md pl-10 pr-16 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
             />
-            {searchQuery && (
+            {searchQuery ? (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94B2BF] hover:text-[#475569]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
+            ) : (
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-[9px]">⌘</span>K
+              </kbd>
             )}
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="bg-[#F7FDFE] border border-[#D8EEF4] rounded-xl px-3 py-2 text-xs font-bold text-[#0E7490] focus:outline-none focus:border-[#22D3EE]"
+            className="bg-background border border-input rounded-md px-3 py-2 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
           >
             <option value="ALL">All Statuses</option>
             <option value="In Progress">In Progress</option>
@@ -135,29 +169,29 @@ export const TargetDashboard: React.FC<Props> = ({
 
           <button
             onClick={onOpenAssignModal}
-            className="bg-linear-to-r from-[#22D3EE] via-[#0891B2] to-[#0E7490] text-white px-4 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 shadow-md hover:brightness-105 transition-all whitespace-nowrap"
+            className="bg-primary text-primary-foreground px-4 py-2.5 rounded-md font-semibold text-xs flex items-center gap-1.5 hover:opacity-90 transition-opacity whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> Assign Sourcing Target
           </button>
         </div>
       </div>
 
-      <div className="bg-white border border-[#D6EEF5] rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-card text-card-foreground border border-border rounded-lg overflow-hidden shadow-sm">
         {filteredTargets.length === 0 ? (
           <div className="py-16 text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#ECFEFF] border border-[#A5F3FC] mx-auto flex items-center justify-center text-[#0891B2]">
+            <div className="w-12 h-12 rounded-lg bg-muted border border-border mx-auto flex items-center justify-center text-foreground">
               <Layers className="w-6 h-6" />
             </div>
-            <h3 className="font-extrabold text-sm text-[#0C4A6E]">
+            <h3 className="font-semibold text-sm text-foreground">
               No Sourcing Targets Found
             </h3>
-            <p className="text-xs text-[#8B9BB0] max-w-sm mx-auto">
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               No records match the current filter or search parameters. Try
               adjusting your query or assign a new target.
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-[#EFF5F8]">
+          <div className="divide-y divide-border">
             {filteredTargets.map((target, idx) => {
               const totalLines = target.lines.length;
               const completedLines = target.lines.filter(
@@ -173,54 +207,48 @@ export const TargetDashboard: React.FC<Props> = ({
               return (
                 <div
                   key={target.id}
-                  className="p-5 hover:bg-[#F8FCFD] transition-colors space-y-4"
+                  className="p-5 hover:bg-muted/50 transition-colors space-y-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full bg-[#E0FBFF] text-[#0891B2] font-black text-xs flex items-center justify-center">
+                      <span className="w-6 h-6 rounded-full bg-muted text-foreground font-semibold text-xs flex items-center justify-center">
                         {idx + 1}
                       </span>
-                      <span className="font-mono font-extrabold text-xs text-[#0891B2] bg-[#ECFEFF] border border-[#A5F3FC] px-2.5 py-0.5 rounded-md">
+                      <span className="font-mono font-semibold text-xs text-foreground bg-muted border border-border px-2.5 py-0.5 rounded-md">
                         {target.sourcingId}
                       </span>
-                      <h3 className="font-black text-sm text-[#0C4A6E] tracking-tight">
+                      <h3 className="font-semibold text-sm text-foreground tracking-tight">
                         {target.title}
                       </h3>
-                      <span
-                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                          target.sourceType === "MASTER"
-                            ? "bg-[#E0FBFF] text-[#0E7490] border border-[#BDF0F7]"
-                            : "bg-[#F3EDFF] text-[#7C3AED] border border-[#DDD0FB]"
-                        }`}
-                      >
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider bg-muted text-muted-foreground border border-border">
                         {target.sourceType}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-4 text-xs">
-                      <div className="flex items-center gap-1.5 text-[#64748B]">
-                        <User className="w-3.5 h-3.5 text-[#94B2BF]" />
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <User className="w-3.5 h-3.5" />
                         <span>
                           Created:{" "}
-                          <strong className="text-[#1E293B]">
+                          <strong className="text-foreground font-medium">
                             {target.createdByName}
                           </strong>
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[#64748B]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#CBD5E1]" />
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <span className="w-1.5 h-1.5 rounded-full bg-border" />
                         <span>
                           Assigned:{" "}
-                          <strong className="text-[#1E293B]">
+                          <strong className="text-foreground font-medium">
                             {target.assignedToName}
                           </strong>
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[#64748B]">
-                        <Clock className="w-3.5 h-3.5 text-[#94B2BF]" />
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Clock className="w-3.5 h-3.5" />
                         <span>
                           Due:{" "}
-                          <strong className="text-[#1E293B]">
+                          <strong className="text-foreground font-medium">
                             {target.dueDate}
                           </strong>
                         </span>
@@ -228,54 +256,40 @@ export const TargetDashboard: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  <div className="bg-[#F8FCFD] border border-[#E6F3F7] rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4">
+                  <div className="bg-muted/60 border border-border rounded-lg p-3.5 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex-1 min-w-[240px]">
-                      <div className="flex justify-between items-center text-xs font-bold mb-1.5">
-                        <span className="text-[#5B7585] flex items-center gap-2">
+                      <div className="flex justify-between items-center text-xs font-medium mb-1.5">
+                        <span className="text-muted-foreground flex items-center gap-2">
                           <span>Sourcing Fulfillment:</span>
-                          <span className="text-[#16A34A]">
+                          <span className="text-foreground">
                             {completedLines} Done
                           </span>
-                          <span className="text-[#CBD5E1]">/</span>
-                          <span className="text-[#EA7A0C]">
+                          <span className="text-border">/</span>
+                          <span>
                             {pendingLines} Pending
                           </span>
                         </span>
-                        <span
-                          className={
-                            isAllDone ? "text-[#16A34A]" : "text-[#0891B2]"
-                          }
-                        >
+                        <span className="text-foreground">
                           {percentage}%
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-[#E6EEF2] rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-border rounded-full overflow-hidden">
                         <div
-                          className={`h-full transition-all duration-500 ${
-                            isAllDone
-                              ? "bg-linear-to-r from-[#4ADE80] to-[#16A34A]" 
-                              : "bg-linear-to-r from-[#22D3EE] to-[#0891B2]"
-                          }`}
+                          className="h-full bg-primary transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider ${
-                          isAllDone
-                            ? "bg-[#DCFCE7] text-[#15803D] border border-[#BBF7D0]"
-                            : "bg-[#CFFAFE] text-[#0E7490] border border-[#A5F3FC]"
-                        }`}
-                      >
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider bg-background text-muted-foreground border border-border">
                         <span className="w-1.5 h-1.5 rounded-full bg-current" />
                         {isAllDone ? "Target Closed" : "In Progress"}
                       </span>
 
                       <button
                         onClick={() => onOpenMappingModal(target)}
-                        className="bg-linear-to-r from-[#22D3EE] via-[#0891B2] to-[#0E7490] text-white px-3.5 py-1.5 rounded-lg font-extrabold text-xs flex items-center gap-1.5 shadow-sm hover:brightness-105 transition-all"
+                        className="bg-primary text-primary-foreground px-3.5 py-1.5 rounded-md font-semibold text-xs flex items-center gap-1.5 hover:opacity-90 transition-opacity"
                       >
                         <span>Sourcing Workspace</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -284,12 +298,12 @@ export const TargetDashboard: React.FC<Props> = ({
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#7C93AE] px-1 flex justify-between">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1 flex justify-between">
                       <span>Requirement Specifications</span>
                       <span>Target Price & Mapped Vendors</span>
                     </div>
 
-                    <div className="divide-y divide-[#F1F5F9] border border-[#E4EFF5] rounded-xl overflow-hidden bg-white">
+                    <div className="divide-y divide-border border border-border rounded-lg overflow-hidden bg-card">
                       {target.lines.map((line) => (
                         <div
                           key={line.id}
@@ -298,23 +312,23 @@ export const TargetDashboard: React.FC<Props> = ({
                           <div className="flex items-start gap-2.5">
                             <div className="mt-0.5">
                               {line.isCompleted ? (
-                                <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />
+                                <CheckCircle2 className="w-4 h-4 text-foreground" />
                               ) : (
-                                <AlertCircle className="w-4 h-4 text-[#EA7A0C]" />
+                                <AlertCircle className="w-4 h-4 text-muted-foreground" />
                               )}
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-[#0F172A]">
+                                <span className="font-medium text-foreground">
                                   {line.productName}
                                 </span>
-                                <span className="font-mono text-[10px] bg-[#F8FAFC] border border-[#E2E8F0] px-1.5 py-0.2 rounded text-[#475569]">
+                                <span className="font-mono text-[10px] bg-muted border border-border px-1.5 py-0.5 rounded-sm text-muted-foreground">
                                   HSN: {line.hsnCode}
                                 </span>
                               </div>
-                              <p className="text-[11px] text-[#64748B] mt-0.5 flex items-center gap-1">
-                                <FileText className="w-3 h-3 text-[#94A3B8]" />
-                                <span className="font-medium text-[#7C8499]">
+                              <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                                <FileText className="w-3 h-3" />
+                                <span className="font-medium">
                                   Clarity ({line.clarity.type}):
                                 </span>
                                 <span>{line.clarity.value}</span>
@@ -324,10 +338,10 @@ export const TargetDashboard: React.FC<Props> = ({
 
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <span className="text-[9px] uppercase font-bold text-[#94A3B8] block">
+                              <span className="text-[9px] uppercase font-medium text-muted-foreground block">
                                 Target Rate
                               </span>
-                              <span className="font-mono font-extrabold text-xs text-[#0C4A6E]">
+                              <span className="font-mono font-semibold text-xs text-foreground">
                                 ₹{line.targetPrice.toLocaleString()}
                               </span>
                             </div>
@@ -336,10 +350,10 @@ export const TargetDashboard: React.FC<Props> = ({
                               onClick={() =>
                                 onOpenMappingModal(target, line.id)
                               }
-                              className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                              className={`px-3 py-1 rounded-md text-xs font-medium border transition-colors flex items-center gap-1.5 ${
                                 line.mappings.length > 0
-                                  ? "bg-[#ECFEFF] border-[#A5F3FC] text-[#0891B2] hover:bg-[#0891B2] hover:text-white"
-                                  : "bg-white border-[#E2E8F0] text-[#64748B] hover:border-[#0891B2] hover:text-[#0891B2]"
+                                  ? "bg-muted border-border text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                                  : "bg-background border-input text-muted-foreground hover:border-foreground hover:text-foreground"
                               }`}
                             >
                               <span>

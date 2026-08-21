@@ -34,12 +34,16 @@ export const SupplierMappingModal: React.FC<Props> = ({
   target,
   initialLineId,
 }) => {
-  const { suppliers, addSupplierMapping, removeSupplierMapping, toggleLineCompletion } =
-    useSourcing();
+  const {
+    suppliers,
+    addSupplierMapping,
+    removeSupplierMapping,
+    toggleLineCompletion,
+  } = useSourcing();
 
   // Active line navigator state
   const [activeLineId, setActiveLineId] = useState<string>(
-    initialLineId ?? target?.lines[0]?.id ?? ""
+    initialLineId ?? target?.lines[0]?.id ?? "",
   );
 
   // Add supplier form state
@@ -52,7 +56,7 @@ export const SupplierMappingModal: React.FC<Props> = ({
   if (!isOpen || !target) return null;
 
   const activeLine: SourcingLineItem | undefined = target.lines.find(
-    (l) => l.id === activeLineId
+    (l) => l.id === activeLineId,
   );
 
   // Landed cost computation: BasePrice × (1 + TaxRate/100)
@@ -122,24 +126,24 @@ export const SupplierMappingModal: React.FC<Props> = ({
     totalLines > 0 ? Math.round((completedLines / totalLines) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-[#A5F3FC]">
-
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-card text-card-foreground rounded-lg w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden shadow-lg border border-border">
         {/* ── HEADER ── */}
-        <div className="bg-gradient-to-r from-[#0E7490] via-[#0891B2] to-[#22D3EE] px-6 py-4 flex items-center justify-between text-white">
+        <div className="bg-muted px-6 py-4 flex items-center justify-between text-foreground border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md bg-background border border-border flex items-center justify-center">
               <PackageCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs bg-white/25 px-2 py-0.5 rounded font-extrabold">
+                <span className="font-mono text-xs bg-background border border-border px-2 py-0.5 rounded-md font-semibold">
                   {target.sourcingId}
                 </span>
-                <h2 className="text-base font-black">{target.title}</h2>
+                <h2 className="text-base font-semibold">{target.title}</h2>
               </div>
-              <p className="text-xs opacity-80">
-                Supplier Mapping Workspace — {completedLines}/{totalLines} lines sourced
+              <p className="text-xs text-muted-foreground">
+                Supplier Mapping Workspace — {completedLines}/{totalLines} lines
+                sourced
               </p>
             </div>
           </div>
@@ -147,18 +151,22 @@ export const SupplierMappingModal: React.FC<Props> = ({
           {/* Overall target progress */}
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-[10px] font-bold opacity-70 mb-1">Fulfillment</div>
-              <div className="w-32 h-2 bg-white/20 rounded-full overflow-hidden">
+              <div className="text-[10px] font-medium text-muted-foreground mb-1">
+                Fulfillment
+              </div>
+              <div className="w-32 h-2 bg-border rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-white rounded-full transition-all duration-500"
+                  className="h-full bg-primary rounded-full transition-all duration-500"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
-              <div className="text-xs font-extrabold mt-0.5">{progressPct}%</div>
+              <div className="text-xs font-semibold mt-0.5">
+                {progressPct}%
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+              className="p-2 hover:bg-accent rounded-md transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -167,10 +175,9 @@ export const SupplierMappingModal: React.FC<Props> = ({
 
         {/* ── BODY: SPLIT LAYOUT ── */}
         <div className="flex flex-1 overflow-hidden">
-
           {/* LEFT — Line Navigator */}
-          <div className="w-64 flex-shrink-0 border-r border-[#E4EFF5] bg-[#F8FCFD] flex flex-col">
-            <div className="px-4 py-3 text-[10px] font-extrabold uppercase tracking-wider text-[#0891B2] border-b border-[#E4EFF5]">
+          <div className="w-64 flex-shrink-0 border-r border-border bg-sidebar text-sidebar-foreground flex flex-col">
+            <div className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-sidebar-border">
               Line Items ({totalLines})
             </div>
             <div className="flex-1 overflow-y-auto">
@@ -185,37 +192,39 @@ export const SupplierMappingModal: React.FC<Props> = ({
                       setCompletionError(null);
                       resetForm();
                     }}
-                    className={`w-full text-left px-4 py-3 border-b border-[#EEF4F7] transition-colors group ${
+                    className={`w-full text-left px-4 py-3 border-b border-sidebar-border transition-colors group ${
                       isActive
-                        ? "bg-[#E0FBFF] border-l-2 border-l-[#0891B2]"
-                        : "hover:bg-white"
+                        ? "bg-sidebar-accent border-l-2 border-l-primary"
+                        : "hover:bg-sidebar-accent/60"
                     }`}
                   >
                     {/* Line number + status */}
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-extrabold text-[#94A3B8]">
+                      <span className="text-[10px] font-semibold text-muted-foreground">
                         LINE #{idx + 1}
                       </span>
                       {line.isCompleted ? (
-                        <span className="text-[9px] font-black text-[#15803D] bg-[#DCFCE7] px-1.5 py-0.5 rounded-full">
+                        <span className="text-[9px] font-semibold text-foreground bg-background px-1.5 py-0.5 rounded-full border border-border">
                           DONE
                         </span>
                       ) : mapped > 0 ? (
-                        <span className="text-[9px] font-black text-[#0891B2] bg-[#ECFEFF] px-1.5 py-0.5 rounded-full">
+                        <span className="text-[9px] font-semibold text-foreground bg-muted px-1.5 py-0.5 rounded-full">
                           {mapped} MAPPED
                         </span>
                       ) : (
-                        <span className="text-[9px] font-black text-[#EA7A0C] bg-[#FFF7ED] px-1.5 py-0.5 rounded-full">
+                        <span className="text-[9px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
                           OPEN
                         </span>
                       )}
                     </div>
                     {/* Product name */}
-                    <div className={`text-xs font-bold truncate ${isActive ? "text-[#0C4A6E]" : "text-[#334155]"}`}>
+                    <div
+                      className={`text-xs font-medium truncate ${isActive ? "text-foreground" : "text-muted-foreground"}`}
+                    >
                       {line.productName}
                     </div>
                     {/* Target rate */}
-                    <div className="text-[10px] font-mono text-[#64748B] mt-0.5">
+                    <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
                       ₹{line.targetPrice.toLocaleString()}
                     </div>
                   </button>
@@ -226,34 +235,35 @@ export const SupplierMappingModal: React.FC<Props> = ({
 
           {/* RIGHT — Mapping Workspace */}
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
-
             {!activeLine ? (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-2">
-                <Building2 className="w-10 h-10 text-[#CBD5E1]" />
-                <p className="text-sm text-[#94A3B8]">Select a line item from the left panel.</p>
+                <Building2 className="w-10 h-10 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Select a line item from the left panel.
+                </p>
               </div>
             ) : (
               <>
                 {/* Line detail header */}
-                <div className="bg-[#F8FCFD] border border-[#D8EEF4] rounded-xl p-4 space-y-2">
+                <div className="bg-muted/60 border border-border rounded-lg p-4 space-y-2">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         {activeLine.isCompleted ? (
-                          <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />
+                          <CheckCircle2 className="w-4 h-4 text-foreground" />
                         ) : (
-                          <AlertCircle className="w-4 h-4 text-[#EA7A0C]" />
+                          <AlertCircle className="w-4 h-4 text-muted-foreground" />
                         )}
-                        <h3 className="font-extrabold text-sm text-[#0C4A6E]">
+                        <h3 className="font-semibold text-sm text-foreground">
                           {activeLine.productName}
                         </h3>
-                        <span className="font-mono text-[10px] bg-white border border-[#E2E8F0] px-1.5 py-0.5 rounded text-[#475569]">
+                        <span className="font-mono text-[10px] bg-background border border-border px-1.5 py-0.5 rounded-md text-muted-foreground">
                           HSN: {activeLine.hsnCode}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[11px] text-[#64748B]">
-                        <FileText className="w-3 h-3 text-[#94A3B8]" />
-                        <span className="font-semibold text-[#7C8499]">
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <FileText className="w-3 h-3 text-muted-foreground" />
+                        <span className="font-medium text-muted-foreground">
                           Clarity ({activeLine.clarity.type}):
                         </span>
                         {activeLine.clarity.type === "link" ? (
@@ -261,44 +271,47 @@ export const SupplierMappingModal: React.FC<Props> = ({
                             href={activeLine.clarity.value}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[#0891B2] underline flex items-center gap-1"
+                            className="text-foreground underline flex items-center gap-1"
                           >
                             <Link2 className="w-3 h-3" /> View Spec Link
                           </a>
                         ) : (
-                          <span className="truncate max-w-sm">{activeLine.clarity.value}</span>
+                          <span className="truncate max-w-sm">
+                            {activeLine.clarity.value}
+                          </span>
                         )}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <span className="text-[9px] uppercase font-extrabold text-[#94A3B8] block">
+                      <span className="text-[9px] uppercase font-semibold text-muted-foreground block">
                         Target Rate
                       </span>
-                      <span className="font-mono font-extrabold text-lg text-[#0C4A6E]">
+                      <span className="font-mono font-semibold text-lg text-foreground">
                         ₹{activeLine.targetPrice.toLocaleString()}
                       </span>
                     </div>
                   </div>
 
                   {/* Mark complete / completion guardrail */}
-                  <div className="flex items-center justify-between pt-2 border-t border-[#E6F3F7]">
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
                     {completionError && (
-                      <div className="flex items-center gap-2 text-[11px] font-bold text-[#B45309] bg-[#FFF7ED] border border-[#FED7AA] px-3 py-1.5 rounded-lg flex-1 mr-4">
+                      <div className="flex items-center gap-2 text-[11px] font-medium text-foreground bg-muted border border-border px-3 py-1.5 rounded-md flex-1 mr-4">
                         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                         {completionError}
                       </div>
                     )}
                     <button
                       onClick={() => handleToggleCompletion(activeLine.id)}
-                      className={`ml-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-extrabold border transition-all ${
+                      className={`ml-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
                         activeLine.isCompleted
-                          ? "bg-[#DCFCE7] border-[#BBF7D0] text-[#15803D] hover:bg-[#F0FDF4]"
-                          : "bg-white border-[#E2E8F0] text-[#64748B] hover:border-[#0891B2] hover:text-[#0891B2]"
+                          ? "bg-muted border-border text-foreground hover:bg-accent"
+                          : "bg-background border-input text-muted-foreground hover:border-foreground hover:text-foreground"
                       }`}
                     >
                       {activeLine.isCompleted ? (
                         <>
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Sourcing Completed
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Sourcing
+                          Completed
                         </>
                       ) : (
                         <>
@@ -312,27 +325,29 @@ export const SupplierMappingModal: React.FC<Props> = ({
                 {/* ── Mapped Suppliers Table ── */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#0891B2]">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground">
                       Mapped Vendors ({activeLine.mappings.length})
                     </span>
                   </div>
 
                   {activeLine.mappings.length === 0 ? (
-                    <div className="border border-dashed border-[#A5F3FC] rounded-xl p-6 text-center space-y-1 bg-[#F0FDFF]">
-                      <Building2 className="w-6 h-6 text-[#67E8F9] mx-auto" />
-                      <p className="text-xs text-[#0891B2] font-bold">No vendors mapped yet</p>
-                      <p className="text-[11px] text-[#64748B]">
+                    <div className="border border-dashed border-border rounded-lg p-6 text-center space-y-1 bg-muted/50">
+                      <Building2 className="w-6 h-6 text-muted-foreground mx-auto" />
+                      <p className="text-xs text-foreground font-medium">
+                        No vendors mapped yet
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
                         Use the form below to add compliant suppliers.
                       </p>
                     </div>
                   ) : (
-                    <div className="border border-[#D8EEF4] rounded-xl overflow-hidden">
+                    <div className="border border-border rounded-lg overflow-hidden">
                       {/* Table header */}
-                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-2 px-4 py-2 bg-[#EEF7FA] text-[10px] font-extrabold uppercase text-[#5B7585] tracking-wider border-b border-[#D8EEF4]">
+                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-2 px-4 py-2 bg-muted text-[10px] font-semibold uppercase text-muted-foreground tracking-wider border-b border-border">
                         <span>Supplier</span>
                         <span>Base Price</span>
                         <span>GST Rate</span>
-                        <span className="text-[#0891B2]">Landed Cost</span>
+                        <span className="text-foreground">Landed Cost</span>
                         <span>Rank</span>
                         <span></span>
                       </div>
@@ -344,60 +359,72 @@ export const SupplierMappingModal: React.FC<Props> = ({
                         .map((mapping) => {
                           const isLowest =
                             mapping.effectivePrice ===
-                            Math.min(...activeLine.mappings.map((m) => m.effectivePrice));
+                            Math.min(
+                              ...activeLine.mappings.map(
+                                (m) => m.effectivePrice,
+                              ),
+                            );
                           return (
                             <div
                               key={mapping.id}
-                              className={`grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-2 px-4 py-3 items-center text-xs border-b border-[#F1F5F9] last:border-0 transition-colors ${
-                                isLowest ? "bg-[#F0FFFE]" : "bg-white hover:bg-[#F8FCFD]"
+                              className={`grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-2 px-4 py-3 items-center text-xs border-b border-border last:border-0 transition-colors ${
+                                isLowest
+                                  ? "bg-muted/70"
+                                  : "bg-card hover:bg-muted/40"
                               }`}
                             >
                               {/* Supplier info */}
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-lg bg-[#ECFEFF] text-[#0891B2] font-black text-[10px] flex items-center justify-center flex-shrink-0">
-                                  {mapping.supplierName.substring(0, 2).toUpperCase()}
+                                <div className="w-7 h-7 rounded-md bg-muted text-foreground font-semibold text-[10px] flex items-center justify-center flex-shrink-0">
+                                  {mapping.supplierName
+                                    .substring(0, 2)
+                                    .toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="font-bold text-[#0F172A] truncate">
+                                  <div className="font-medium text-foreground truncate">
                                     {mapping.supplierName}
                                   </div>
-                                  <div className="font-mono text-[10px] text-[#64748B]">
+                                  <div className="font-mono text-[10px] text-muted-foreground">
                                     {mapping.supplierCode}
                                   </div>
                                 </div>
                                 {isLowest && (
-                                  <span className="text-[9px] font-black text-[#15803D] bg-[#DCFCE7] px-1.5 py-0.5 rounded-full flex-shrink-0">
+                                  <span className="text-[9px] font-semibold text-foreground bg-background border border-border px-1.5 py-0.5 rounded-full flex-shrink-0">
                                     L1
                                   </span>
                                 )}
                               </div>
 
                               {/* Base price */}
-                              <div className="font-mono font-extrabold text-[#334155]">
+                              <div className="font-mono font-semibold text-foreground">
                                 ₹{mapping.basePrice.toLocaleString()}
                               </div>
 
                               {/* Tax rate */}
-                              <div className="font-mono text-[#64748B]">
+                              <div className="font-mono text-muted-foreground">
                                 {mapping.taxRate}%
                               </div>
 
                               {/* Landed cost — computed field */}
-                              <div className="font-mono font-extrabold text-[#0891B2]">
+                              <div className="font-mono font-semibold text-foreground">
                                 ₹{mapping.effectivePrice.toLocaleString()}
                               </div>
 
                               {/* Rank */}
-                              <div className="text-[#64748B] font-bold">
+                              <div className="text-muted-foreground font-medium">
                                 #{mapping.rank}
                               </div>
 
                               {/* Remove */}
                               <button
                                 onClick={() =>
-                                  removeSupplierMapping(target.id, activeLine.id, mapping.id)
+                                  removeSupplierMapping(
+                                    target.id,
+                                    activeLine.id,
+                                    mapping.id,
+                                  )
                                 }
-                                className="p-1.5 rounded-lg text-[#94A3B8] hover:text-red-500 hover:bg-red-50 transition-colors"
+                                className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                                 title="Remove mapping"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -410,13 +437,13 @@ export const SupplierMappingModal: React.FC<Props> = ({
                 </div>
 
                 {/* ── Add Supplier Form ── */}
-                <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4 space-y-4">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#0891B2] flex items-center gap-1.5">
+                <div className="bg-muted/60 border border-border rounded-lg p-4 space-y-4">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
                     <Plus className="w-3.5 h-3.5" /> Add Supplier Mapping
                   </span>
 
                   {formError && (
-                    <div className="flex items-center gap-2 text-[11px] font-bold text-[#B45309] bg-[#FFF7ED] border border-[#FED7AA] px-3 py-1.5 rounded-lg">
+                    <div className="flex items-center gap-2 text-[11px] font-medium text-foreground bg-muted border border-border px-3 py-1.5 rounded-md">
                       <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                       {formError}
                     </div>
@@ -425,7 +452,7 @@ export const SupplierMappingModal: React.FC<Props> = ({
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     {/* Supplier select */}
                     <div className="md:col-span-2">
-                      <label className="text-[10px] font-bold text-[#64748B] uppercase block mb-1 flex items-center gap-1">
+                      <label className="text-[10px] font-medium text-muted-foreground uppercase block mb-1 flex items-center gap-1">
                         <Building2 className="w-3 h-3" /> Supplier
                       </label>
                       <select
@@ -434,7 +461,7 @@ export const SupplierMappingModal: React.FC<Props> = ({
                           setSelectedSupplierId(e.target.value);
                           setFormError(null);
                         }}
-                        className="w-full bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 text-xs font-bold text-[#0C4A6E] focus:outline-none focus:border-[#0891B2]"
+                        className="w-full bg-background border border-input rounded-md px-3 py-2 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
                       >
                         <option value="">-- Select Compliant Vendor --</option>
                         {unmappedSuppliers.length === 0 ? (
@@ -447,22 +474,36 @@ export const SupplierMappingModal: React.FC<Props> = ({
                           ))
                         )}
                       </select>
-                      {selectedSupplierId && (() => {
-                        const s = suppliers.find(x => x.id === selectedSupplierId);
-                        if (!s) return null;
-                        return (
-                          <div className="mt-1.5 flex items-center gap-3 text-[10px] text-[#64748B]">
-                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-[#94A3B8]" />{s.city}, {s.state}</span>
-                            <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-[#16A34A]" />{s.isCompliant ? "GST Compliant" : "Non-Compliant"}</span>
-                            <span className="flex items-center gap-1"><Tag className="w-3 h-3 text-[#94A3B8]" />{s.category}</span>
-                          </div>
-                        );
-                      })()}
+                      {selectedSupplierId &&
+                        (() => {
+                          const s = suppliers.find(
+                            (x) => x.id === selectedSupplierId,
+                          );
+                          if (!s) return null;
+                          return (
+                            <div className="mt-1.5 flex items-center gap-3 text-[10px] text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-muted-foreground" />
+                                {s.city}, {s.state}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3 text-foreground" />
+                                {s.isCompliant
+                                  ? "GST Compliant"
+                                  : "Non-Compliant"}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Tag className="w-3 h-3 text-muted-foreground" />
+                                {s.category}
+                              </span>
+                            </div>
+                          );
+                        })()}
                     </div>
 
                     {/* Base price */}
                     <div>
-                      <label className="text-[10px] font-bold text-[#64748B] uppercase block mb-1 flex items-center gap-1">
+                      <label className="text-[10px] font-medium text-muted-foreground uppercase block mb-1 flex items-center gap-1">
                         <IndianRupee className="w-3 h-3" /> Base Price (₹)
                       </label>
                       <input
@@ -471,22 +512,24 @@ export const SupplierMappingModal: React.FC<Props> = ({
                         placeholder="e.g. 3800"
                         value={basePrice}
                         onChange={(e) => {
-                          setBasePrice(e.target.value === "" ? "" : Number(e.target.value));
+                          setBasePrice(
+                            e.target.value === "" ? "" : Number(e.target.value),
+                          );
                           setFormError(null);
                         }}
-                        className="w-full bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 text-xs font-mono font-bold text-[#0C4A6E] focus:outline-none focus:border-[#0891B2]"
+                        className="w-full bg-background border border-input rounded-md px-3 py-2 text-xs font-mono font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
                       />
                     </div>
 
                     {/* Tax rate */}
                     <div>
-                      <label className="text-[10px] font-bold text-[#64748B] uppercase block mb-1 flex items-center gap-1">
+                      <label className="text-[10px] font-medium text-muted-foreground uppercase block mb-1 flex items-center gap-1">
                         <PercentIcon className="w-3 h-3" /> GST Rate (%)
                       </label>
                       <select
                         value={taxRate}
                         onChange={(e) => setTaxRate(Number(e.target.value))}
-                        className="w-full bg-white border border-[#E2E8F0] rounded-lg px-3 py-2 text-xs font-bold text-[#0C4A6E] focus:outline-none focus:border-[#0891B2]"
+                        className="w-full bg-background border border-input rounded-md px-3 py-2 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
                       >
                         <option value={0}>0% (Exempt)</option>
                         <option value={5}>5%</option>
@@ -499,25 +542,30 @@ export const SupplierMappingModal: React.FC<Props> = ({
 
                   {/* Computed landed cost preview */}
                   {computedLandedCost !== null && (
-                    <div className="flex items-center gap-3 bg-[#ECFEFF] border border-[#A5F3FC] rounded-lg px-4 py-2.5">
-                      <TrendingUp className="w-4 h-4 text-[#0891B2]" />
-                      <span className="text-xs text-[#0E7490] font-bold">Computed Landed Cost:</span>
-                      <span className="font-mono text-sm font-extrabold text-[#0C4A6E]">
+                    <div className="flex items-center gap-3 bg-muted border border-border rounded-md px-4 py-2.5">
+                      <TrendingUp className="w-4 h-4 text-foreground" />
+                      <span className="text-xs text-foreground font-medium">
+                        Computed Landed Cost:
+                      </span>
+                      <span className="font-mono text-sm font-semibold text-foreground">
                         ₹{computedLandedCost.toLocaleString()}
                       </span>
-                      <span className="text-[10px] text-[#64748B] ml-auto">
-                        = ₹{Number(basePrice).toLocaleString()} × (1 + {taxRate}%)
+                      <span className="text-[10px] text-muted-foreground ml-auto">
+                        = ₹{Number(basePrice).toLocaleString()} × (1 + {taxRate}
+                        %)
                       </span>
-                      {activeLine.targetPrice > 0 && computedLandedCost > activeLine.targetPrice && (
-                        <span className="text-[10px] font-extrabold text-[#DC2626] bg-[#FEF2F2] border border-[#FECACA] px-2 py-0.5 rounded-full">
-                          ▲ Exceeds target
-                        </span>
-                      )}
-                      {activeLine.targetPrice > 0 && computedLandedCost <= activeLine.targetPrice && (
-                        <span className="text-[10px] font-extrabold text-[#15803D] bg-[#DCFCE7] border border-[#BBF7D0] px-2 py-0.5 rounded-full">
-                          ✓ Within target
-                        </span>
-                      )}
+                      {activeLine.targetPrice > 0 &&
+                        computedLandedCost > activeLine.targetPrice && (
+                          <span className="text-[10px] font-semibold text-muted-foreground bg-background border border-border px-2 py-0.5 rounded-full">
+                            ▲ Exceeds target
+                          </span>
+                        )}
+                      {activeLine.targetPrice > 0 &&
+                        computedLandedCost <= activeLine.targetPrice && (
+                          <span className="text-[10px] font-semibold text-foreground bg-background border border-border px-2 py-0.5 rounded-full">
+                            ✓ Within target
+                          </span>
+                        )}
                     </div>
                   )}
 
@@ -525,8 +573,10 @@ export const SupplierMappingModal: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={handleAddMapping}
-                      disabled={unmappedSuppliers.length === 0 && !selectedSupplierId}
-                      className="px-5 py-2.5 bg-gradient-to-r from-[#0891B2] to-[#0E7490] text-white rounded-xl text-xs font-extrabold flex items-center gap-2 shadow-md hover:brightness-105 transition-all disabled:opacity-50"
+                      disabled={
+                        unmappedSuppliers.length === 0 && !selectedSupplierId
+                      }
+                      className="px-5 py-2.5 bg-primary text-primary-foreground rounded-md text-xs font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
                     >
                       <Plus className="w-4 h-4" /> Map Supplier to Line
                     </button>
@@ -538,25 +588,24 @@ export const SupplierMappingModal: React.FC<Props> = ({
         </div>
 
         {/* ── FOOTER ── */}
-        <div className="px-6 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between">
-          <div className="text-xs text-[#64748B] flex items-center gap-4">
+        <div className="px-6 py-3 border-t border-border bg-muted/60 flex items-center justify-between">
+          <div className="text-xs text-muted-foreground flex items-center gap-4">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#16A34A]" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-foreground" />
               <strong>{completedLines}</strong> completed
             </span>
             <span className="flex items-center gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5 text-[#EA7A0C]" />
+              <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
               <strong>{totalLines - completedLines}</strong> pending
             </span>
           </div>
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-[#E2E8F0] text-xs font-bold text-[#475569] hover:bg-[#F1F5F9] transition-colors"
+            className="px-5 py-2.5 rounded-md border border-input text-xs font-medium text-foreground hover:bg-accent transition-colors"
           >
             Close Workspace
           </button>
         </div>
-
       </div>
     </div>
   );

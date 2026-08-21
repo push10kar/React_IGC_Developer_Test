@@ -1,17 +1,122 @@
 @import "tailwindcss";
 
-*, *::before, *::after {
-  box-sizing: border-box;
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.5rem;
+  color-scheme: light;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
 }
 
-html, body {
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-accent: oklch(0.269 0 0);
+}
+
+html.brand {
+  --primary: oklch(0.37 0.013 285.8);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.37 0.013 285.8);
+}
+
+html.dark.brand {
+  --primary: oklch(0.92 0.004 286.32);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+  --ring: oklch(0.87 0.006 286.286);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html,
+body {
   height: 100%;
 }
 
 body {
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-  background: #F4F6FB;
-  color: #0F172A;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -23,13 +128,11 @@ body {
   width: 100%;
 }
 
-/* ── IDIMS ENTERPRISE NAVIGATION STYLES ── */
 .idims-nav {
   height: 110px;
-  background: #fff;
-  border-bottom: 1px solid #E4E7EF;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-  padding: 0 16px 0 16px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -54,14 +157,14 @@ body {
 .idims-row-top {
   flex: 1.08;
   gap: 16px;
-  padding: 8px 0 4px 0;
-  border-bottom: 1px solid #EEF1F7;
+  padding: 8px 0 4px;
+  border-bottom: 1px solid var(--border);
   justify-content: space-between;
 }
 
 .idims-row-bottom {
   flex: 1;
-  padding: 6px 0 6px 0;
+  padding: 6px 0;
   min-width: 0;
 }
 
@@ -77,45 +180,36 @@ body {
   display: none;
 }
 
-/* SEARCH BAR */
 .idims-search {
   width: 380px;
   flex-shrink: 0;
-  height: 38px;
+  height: 36px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: linear-gradient(180deg, #FFFFFF, #F7F8FC);
-  border: 1.5px solid #E7EAF3;
-  border-radius: 12px;
+  gap: 8px;
+  background: var(--background);
+  border: 1px solid var(--input);
+  border-radius: var(--radius);
   padding: 0 8px 0 12px;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.03);
-  transition: border-color .18s, box-shadow .18s, background .18s, transform .18s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .idims-search:hover {
-  border-color: #D6DBEC;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05), 0 2px 6px rgba(15, 23, 42, 0.06);
+  border-color: var(--ring);
 }
 
 .idims-search:focus-within {
-  background: #fff;
-  border-color: #0891B2;
-  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.15), 0 4px 14px rgba(8, 145, 178, 0.12);
-  transform: translateY(-0.5px);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
 }
 
 .idims-search-ico {
   display: flex;
   align-items: center;
-  color: #A0A8BD;
+  color: var(--muted-foreground);
   flex-shrink: 0;
-  transition: color .18s, transform .18s;
-}
-
-.idims-search:focus-within .idims-search-ico {
-  color: #0891B2;
-  transform: scale(1.06);
 }
 
 .idims-search-input {
@@ -125,32 +219,26 @@ body {
   outline: none;
   background: transparent;
   font-family: inherit;
-  font-size: 12.5px;
-  color: #0F172A;
-  letter-spacing: .1px;
+  font-size: 13px;
+  color: var(--foreground);
 }
 
 .idims-search-input::placeholder {
-  color: #9AA2B8;
-  font-weight: 400;
+  color: var(--muted-foreground);
 }
 
 .idims-search-kbd {
   flex-shrink: 0;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #6B7280;
-  background: linear-gradient(180deg, #FFFFFF, #F1F3F9);
-  border: 1px solid #E2E6F0;
-  border-bottom-width: 2px;
-  border-radius: 7px;
-  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 2px 6px;
   line-height: 1;
-  letter-spacing: .3px;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
-/* LOGO */
 .idims-logo {
   display: flex;
   align-items: center;
@@ -160,47 +248,10 @@ body {
   text-decoration: none;
 }
 
-.idims-logo-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #B45309 0%, #D97706 50%, #EA580C 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 900;
-  font-size: 18px;
-  letter-spacing: -0.5px;
-  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
-  position: relative;
-  overflow: hidden;
-}
-
-.idims-logo-mark::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-.idims-logo-text {
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #9A3412 0%, #C2410C 50%, #EA580C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .idims-divider {
   width: 1px;
-  height: 48px;
-  background: #E4E7EF;
+  height: 28px;
+  background: var(--border);
   flex-shrink: 0;
   margin: 0 12px;
 }
@@ -210,26 +261,27 @@ body {
   align-items: center;
   flex: 1;
   min-width: 0;
-  gap: 4px;
+  gap: 2px;
 }
 
-/* NAV BUTTON */
 .idims-nav-btn {
   position: relative;
-  height: 36px;
+  height: 32px;
   padding: 0 10px;
-  border-radius: 9px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #5B6478;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-foreground);
   background: transparent;
   border: none;
   cursor: pointer;
   font-family: inherit;
-  transition: all .2s ease;
+  transition:
+    color 0.15s,
+    background 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -238,57 +290,26 @@ body {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  color: #94A3B8;
-  transition: color .2s ease, transform .2s ease;
-}
-
-.idims-nav-btn::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 2px;
-  width: 0;
-  height: 2.5px;
-  border-radius: 99px;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, #22D3EE 0%, #0891B2 55%, #0E7490 100%);
-  opacity: 0;
-  transition: width .25s ease, opacity .2s ease;
-  pointer-events: none;
+  color: inherit;
 }
 
 .idims-nav-btn:hover {
-  color: #0891B2;
-}
-
-.idims-nav-btn:hover .idims-ico {
-  color: #0891B2;
-  transform: scale(1.1);
-}
-
-.idims-nav-btn:hover::after,
-.idims-nav-btn.nav-active::after,
-.idims-nav-btn.dd-open::after {
-  width: 100%;
-  opacity: 1;
+  color: var(--foreground);
+  background: var(--accent);
 }
 
 .idims-nav-btn.nav-active,
 .idims-nav-btn.dd-open {
-  font-weight: 700;
-  color: #0891B2;
-}
-
-.idims-nav-btn.nav-active .idims-ico,
-.idims-nav-btn.dd-open .idims-ico {
-  color: #0891B2;
+  font-weight: 600;
+  color: var(--foreground);
+  background: var(--accent);
 }
 
 .dd-chev {
   display: flex;
   align-items: center;
-  opacity: 0.5;
-  transition: transform .18s ease;
+  opacity: 0.6;
+  transition: transform 0.15s ease;
 }
 
 .idims-nav-btn.dd-open .dd-chev {
@@ -296,7 +317,6 @@ body {
   opacity: 1;
 }
 
-/* BRANCH SWITCHER */
 .idims-branch-wrap {
   position: relative;
   flex-shrink: 0;
@@ -305,41 +325,40 @@ body {
 .idims-branch-btn {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   cursor: pointer;
-  height: 38px;
-  padding: 0 10px 0 10px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #FFFFFF, #F7F8FC);
-  border: 1.5px solid #E7EAF3;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  background: var(--background);
+  border: 1px solid var(--input);
   font-family: inherit;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
-  transition: all .18s ease;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   width: 280px;
+  color: var(--foreground);
 }
 
 .idims-branch-btn:hover {
-  border-color: #A5F3FC;
-  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.1);
+  border-color: var(--ring);
 }
 
 .idims-branch-btn.dd-open {
-  border-color: #0891B2;
-  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.13);
-  background: #fff;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
 }
 
 .idims-branch-ico {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: calc(var(--radius) - 2px);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  background: linear-gradient(135deg, #06B6D4, #0891B2);
-  box-shadow: 0 2px 5px rgba(8, 145, 178, 0.3);
+  color: var(--primary-foreground);
+  background: var(--primary);
 }
 
 .idims-branch-meta {
@@ -352,8 +371,8 @@ body {
 
 .idims-branch-name {
   font-size: 12px;
-  font-weight: 700;
-  color: #1E293B;
+  font-weight: 600;
+  color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -362,14 +381,14 @@ body {
 
 .idims-branch-tag {
   align-self: flex-start;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: .4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
-  color: #0891B2;
-  background: #ECFEFF;
-  border: 1px solid #A5F3FC;
-  border-radius: 5px;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
   padding: 1px 5px;
   line-height: 1;
 }
@@ -380,30 +399,30 @@ body {
   left: 0;
   z-index: 120;
   width: 320px;
-  border-radius: 16px;
+  border-radius: var(--radius);
   overflow: hidden;
-  background: #fff;
-  border: 1px solid #EAECF3;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.16);
-  animation: ddFadeDown .18s ease forwards;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--foreground) 8%, transparent);
+  animation: ddFadeDown 0.15s ease forwards;
 }
 
 .idims-branch-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
-  border-radius: 10px;
+  padding: 8px 10px;
+  border-radius: calc(var(--radius) - 2px);
   cursor: pointer;
-  transition: background .14s;
+  transition: background 0.12s;
 }
 
 .idims-branch-item:hover,
 .idims-branch-item.active {
-  background: #ECFEFF;
+  background: var(--accent);
 }
 
-/* THEME TOGGLE & ACTIONS */
 .idims-theme-switch {
   display: flex;
   align-items: center;
@@ -411,80 +430,84 @@ body {
   flex-shrink: 0;
   padding: 3px 8px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #FFFFFF, #F7F8FC);
-  border: 1.5px solid #E7EAF3;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
 }
 
 .idims-theme-toggle {
   position: relative;
-  width: 38px;
+  width: 36px;
   height: 20px;
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: linear-gradient(135deg, #CBD5E1, #94A3B8);
-  transition: background .25s ease;
+  background: var(--input);
+  transition: background 0.2s ease;
 }
 
 .idims-theme-toggle::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  transition: transform .25s ease;
+  background: var(--background);
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease;
 }
 
-body.idims-brand .idims-theme-toggle {
-  background: linear-gradient(135deg, #F97316, #EA580C);
+html.brand .idims-theme-toggle {
+  background: var(--primary);
 }
 
-body.idims-brand .idims-theme-toggle::after {
-  transform: translateX(18px);
+html.brand .idims-theme-toggle::after {
+  transform: translateX(16px);
+  background: var(--primary-foreground);
+  border-color: transparent;
 }
 
 .idims-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .idims-action-btn {
   position: relative;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #64748B;
-  transition: all .18s ease;
+  color: var(--muted-foreground);
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
 .idims-action-btn:hover {
-  color: #0891B2;
-  background: #ECFEFF;
+  color: var(--foreground);
+  background: var(--accent);
 }
 
 .idims-action-badge {
   position: absolute;
   top: 5px;
   right: 5px;
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #EF4444;
-  border: 1.5px solid #fff;
+  background: var(--primary);
+  border: 1.5px solid var(--card);
 }
 
-/* PROFILE DROPDOWN */
 .idims-profile-wrap {
   position: relative;
   flex-shrink: 0;
@@ -495,36 +518,37 @@ body.idims-brand .idims-theme-toggle::after {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 3px 10px 3px 4px;
+  padding: 2px 10px 2px 3px;
   border-radius: 999px;
-  background: #fff;
-  border: 1.5px solid #E4E7EF;
+  background: var(--background);
+  border: 1px solid var(--border);
   cursor: pointer;
-  transition: all .18s ease;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .idims-profile-btn:hover {
-  border-color: #A5F3FC;
-  background: #ECFEFF;
+  background: var(--accent);
 }
 
 .idims-avatar {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #06B6D4, #0891B2);
+  background: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  font-weight: 800;
-  color: #fff;
+  font-weight: 600;
+  color: var(--primary-foreground);
 }
 
 .idims-profile-name {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #0F172A;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--foreground);
 }
 
 .idims-profile-panel {
@@ -533,173 +557,44 @@ body.idims-brand .idims-theme-toggle::after {
   right: 0;
   z-index: 120;
   width: 280px;
-  border-radius: 18px;
+  border-radius: var(--radius);
   overflow: hidden;
-  background: #fff;
-  border: 1px solid #ECECF6;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.15);
-  animation: ddFadeDown .2s ease forwards;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--foreground) 8%, transparent);
+  animation: ddFadeDown 0.15s ease forwards;
 }
 
 .idims-profile-head {
   padding: 16px;
-  background: linear-gradient(135deg, #0C4A6E 0%, #0891B2 100%);
-  color: #fff;
+  background: var(--muted);
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
 }
 
-/* DROPDOWN PANELS */
 .idims-dropdown {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  background: #fff;
-  border: 1.5px solid #E8ECF5;
-  border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--foreground) 8%, transparent);
   z-index: 110;
   overflow: hidden;
-  animation: ddFadeDown .18s ease forwards;
+  animation: ddFadeDown 0.15s ease forwards;
   min-width: 260px;
 }
 
 @keyframes ddFadeDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* DARK MODE OVERRIDES */
-body.idims-dark {
-  background: #0F1117;
-  color: #E5E7EB;
-}
-
-body.idims-dark main {
-  color: #E5E7EB;
-}
-
-body.idims-dark .bg-white {
-  background-color: #171A23 !important;
-  color: #F1F5F9 !important;
-  border-color: #262B38 !important;
-}
-
-body.idims-dark .bg-\[\#F4F6FB\] {
-  background-color: #0F1117 !important;
-}
-
-body.idims-dark .bg-\[\#F8FCFD\],
-body.idims-dark .bg-\[\#F7FDFE\],
-body.idims-dark .bg-\[\#EEF7FA\],
-body.idims-dark .bg-\[\#F8FAFC\] {
-  background-color: #1E2230 !important;
-  border-color: #2C3242 !important;
-}
-
-body.idims-dark .text-\[\#0F172A\],
-body.idims-dark .text-\[\#0C4A6E\],
-body.idims-dark .text-\[\#1E293B\],
-body.idims-dark .text-\[\#334155\] {
-  color: #F8FAFC !important;
-}
-
-body.idims-dark .text-\[\#64748B\],
-body.idims-dark .text-\[\#5B7585\],
-body.idims-dark .text-\[\#8B9BB0\],
-body.idims-dark .text-\[\#7C93AE\],
-body.idims-dark .text-\[\#94A3B8\] {
-  color: #94A3B8 !important;
-}
-
-body.idims-dark .border-\[\#D6EEF5\],
-body.idims-dark .border-\[\#D8EEF4\],
-body.idims-dark .border-\[\#E4EFF5\],
-body.idims-dark .border-\[\#E2E8F0\],
-body.idims-dark .border-\[\#E6F3F7\],
-body.idims-dark .divide-\[\#EFF5F8\],
-body.idims-dark .divide-\[\#F1F5F9\] {
-  border-color: #262B38 !important;
-}
-
-body.idims-dark input,
-body.idims-dark select {
-  background-color: #1E2230 !important;
-  color: #F8FAFC !important;
-  border-color: #2C3242 !important;
-}
-
-body.idims-dark .idims-nav {
-  background: #171A23;
-  border-bottom-color: #262B38;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-}
-
-body.idims-dark .idims-row-top {
-  border-bottom-color: #262B38;
-}
-
-body.idims-dark .idims-search {
-  background: linear-gradient(180deg, #1E2230, #1A1D29);
-  border-color: #2C3242;
-}
-
-body.idims-dark .idims-search-input {
-  color: #E5E7EB;
-}
-
-body.idims-dark .idims-search-kbd {
-  background: #1E2230;
-  border-color: #2C3242;
-  color: #9CA3AF;
-}
-
-body.idims-dark .idims-nav-btn {
-  color: #9CA3AF;
-}
-
-body.idims-dark .idims-nav-btn:hover,
-body.idims-dark .idims-nav-btn.nav-active {
-  color: #22D3EE;
-}
-
-body.idims-dark .idims-branch-btn {
-  background: linear-gradient(180deg, #1E2230, #1A1D29);
-  border-color: #2C3242;
-}
-
-body.idims-dark .idims-branch-name {
-  color: #E5E7EB;
-}
-
-body.idims-dark .idims-branch-panel,
-body.idims-dark .idims-profile-panel,
-body.idims-dark .idims-dropdown {
-  background: #171A23;
-  border-color: #262B38;
-}
-
-body.idims-dark .idims-branch-item:hover {
-  background: #222634;
-}
-
-body.idims-dark .idims-profile-btn {
-  background: #171A23;
-  border-color: #262B38;
-}
-
-body.idims-dark .idims-profile-name {
-  color: #E5E7EB;
-}
-
-/* BRAND THEME OVERRIDES */
-body.idims-brand .idims-logo-mark {
-  background: linear-gradient(135deg, #EA580C, #C2410C);
-}
-
-body.idims-brand .idims-nav-btn:hover,
-body.idims-brand .idims-nav-btn.nav-active {
-  color: #EA580C;
-}
-
-body.idims-brand .idims-nav-btn::after {
-  background: linear-gradient(90deg, #FB923C, #EA580C, #C2410C);
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
