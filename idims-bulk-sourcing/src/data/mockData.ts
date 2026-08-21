@@ -1,4 +1,4 @@
-import { Supplier, SourcingTarget } from "../types/sourcing";
+import type { Supplier, SourcingTarget } from "../types/sourcing";
 
 export const INITIAL_SUPPLIERS: Supplier[] = [
   {
