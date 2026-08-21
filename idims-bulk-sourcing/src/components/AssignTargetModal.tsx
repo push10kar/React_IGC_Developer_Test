@@ -4,15 +4,11 @@ import {
   Plus,
   Trash2,
   Layers,
-  FileText,
   Link2,
   Upload,
   Check,
   Lock,
-  Calendar,
-  User,
   FileCheck,
-  AlertCircle
 } from 'lucide-react';
 import { useSourcing } from '../context/SourcingContext';
 import type { SourcingLineItem, SourcingSourceType, ClarityType } from '../types/sourcing';

@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   AlertCircle,
   AlertTriangle,
-  ChevronRight,
   Plus,
   Trash2,
   FileText,

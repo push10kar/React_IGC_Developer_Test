@@ -9,10 +9,7 @@ import {
   FileText,
   ChevronRight,
   Layers,
-  Filter,
   X,
-  ExternalLink,
-  Edit2,
 } from "lucide-react";
 import { useSourcing } from "../context/SourcingContext";
 import type { SourcingTarget } from "../types/sourcing";

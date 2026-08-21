@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from "react";
 import type {
   SourcingTarget,
-  SourcingLineItem,
   SupplierMapping,
   Supplier,
 } from "../types/sourcing";
