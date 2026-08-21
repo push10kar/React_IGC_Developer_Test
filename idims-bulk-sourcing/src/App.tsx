@@ -4,6 +4,7 @@ import { TargetDashboard } from "./components/TargetDashboard";
 import { IdimsNavbar } from "./components/IdimsNavbar";
 import { VaultView } from "./components/VaultView";
 import { ModulePlaceholderView } from "./components/ModulePlaceholderView";
+import { AssignTargetModal } from "./components/AssignTargetModal";
 import type { SourcingTarget } from "./types/sourcing";
 
 export const App: React.FC = () => {
@@ -113,6 +114,11 @@ export const App: React.FC = () => {
         <main className="max-w-7xl w-full mx-auto p-6 flex-1">
           {renderContent()}
         </main>
+
+        <AssignTargetModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+        />
       </div>
     </SourcingProvider>
   );
