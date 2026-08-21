@@ -5,6 +5,7 @@ import { IdimsNavbar } from "./components/IdimsNavbar";
 import { VaultView } from "./components/VaultView";
 import { ModulePlaceholderView } from "./components/ModulePlaceholderView";
 import { AssignTargetModal } from "./components/AssignTargetModal";
+import { SupplierMappingModal } from "./components/SupplierMappingModal";
 import type { SourcingTarget } from "./types/sourcing";
 
 export const App: React.FC = () => {
@@ -118,6 +119,13 @@ export const App: React.FC = () => {
         <AssignTargetModal
           isOpen={isAssignModalOpen}
           onClose={() => setIsAssignModalOpen(false)}
+        />
+
+        <SupplierMappingModal
+          isOpen={isMappingModalOpen}
+          onClose={() => setIsMappingModalOpen(false)}
+          target={activeTarget}
+          initialLineId={activeLineId}
         />
       </div>
     </SourcingProvider>
