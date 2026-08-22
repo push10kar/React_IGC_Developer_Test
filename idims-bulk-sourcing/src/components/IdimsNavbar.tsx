@@ -25,6 +25,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+import { PurchaseRequisitionModal } from "./PurchaseRequisitionModal";
+
 interface IdimsNavbarProps {
   onSearchChange?: (query: string) => void;
   searchQuery?: string;
@@ -67,9 +69,17 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [notificationsCount] = useState(3);
-  const [inboxCount] = useState(5);
-  const [cartCount] = useState(2);
+  const [isRequisitionModalOpen, setIsRequisitionModalOpen] = useState(false);
+  const [activeActionPanel, setActiveActionPanel] = useState<
+    "inbox" | "notifications" | "cart" | null
+  >(null);
+
+  const toggleActionPanel = (panel: "inbox" | "notifications" | "cart") => {
+    setActiveActionPanel(activeActionPanel === panel ? null : panel);
+    setIsBranchOpen(false);
+    setIsProfileOpen(false);
+    setActiveDropdown(null);
+  };
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
@@ -320,7 +330,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
               </button>
 
               {/* ACTION ICONS: Fullscreen, Inbox, Bell, Cart */}
-              <div className="idims-actions">
+              <div className="idims-actions relative">
                 <button
                   onClick={toggleFullscreen}
                   className="idims-action-btn"
@@ -329,31 +339,138 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                   {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </button>
 
-                {/* INBOX ICON BEFORE BELL */}
-                <button className="idims-action-btn" title="Inbox & Messages">
-                  <Mail className="w-4 h-4" />
-                  {inboxCount > 0 && (
+                {/* INBOX ICON & POPOVER */}
+                <div className="relative">
+                  <button
+                    onClick={() => toggleActionPanel("inbox")}
+                    className={`idims-action-btn ${activeActionPanel === "inbox" ? "bg-accent text-accent-foreground" : ""}`}
+                    title="Inbox & Messages"
+                  >
+                    <Mail className="w-4 h-4" />
                     <span className="idims-action-badge" />
-                  )}
-                </button>
+                  </button>
 
-                {/* BELL ICON */}
-                <button className="idims-action-btn" title="Notifications">
-                  <Bell className="w-4 h-4" />
-                  {notificationsCount > 0 && (
+                  {activeActionPanel === "inbox" && (
+                    <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden text-card-foreground">
+                      <div className="p-3 bg-muted border-b border-border flex justify-between items-center">
+                        <span className="font-semibold text-xs text-foreground">Sourcing Messages (3)</span>
+                        <span className="text-[10px] text-primary hover:underline cursor-pointer">Mark all read</span>
+                      </div>
+                      <div className="divide-y divide-border max-h-64 overflow-y-auto">
+                        <div className="p-3 hover:bg-muted/50 cursor-pointer space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-medium text-foreground">Tata Steel Procurement</span>
+                            <span className="text-[10px] text-muted-foreground">10m ago</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">Revised quote submitted for Galvanized I-Beam 200mm (BST-001).</p>
+                        </div>
+                        <div className="p-3 hover:bg-muted/50 cursor-pointer space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-medium text-foreground">Jindal Steel & Power</span>
+                            <span className="text-[10px] text-muted-foreground">1h ago</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">Compliance test certificate attached for Grade A Cold Rolled Sheet.</p>
+                        </div>
+                        <div className="p-3 hover:bg-muted/50 cursor-pointer space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-medium text-foreground">Asian Paints Industrial</span>
+                            <span className="text-[10px] text-muted-foreground">3h ago</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">Delivery window confirmed for Epoxy Primer batch PM-103.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* BELL NOTIFICATIONS & POPOVER */}
+                <div className="relative">
+                  <button
+                    onClick={() => toggleActionPanel("notifications")}
+                    className={`idims-action-btn ${activeActionPanel === "notifications" ? "bg-accent text-accent-foreground" : ""}`}
+                    title="Notifications"
+                  >
+                    <Bell className="w-4 h-4" />
                     <span className="idims-action-badge" />
-                  )}
-                </button>
+                  </button>
 
-                {/* CART ICON AFTER BELL */}
-                <button className="idims-action-btn" title="Requisition Cart">
-                  <ShoppingCart className="w-4 h-4" />
-                  {cartCount > 0 && (
+                  {activeActionPanel === "notifications" && (
+                    <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden text-card-foreground">
+                      <div className="p-3 bg-muted border-b border-border flex justify-between items-center">
+                        <span className="font-semibold text-xs text-foreground">Notifications</span>
+                        <span className="text-[10px] text-muted-foreground">Clear all</span>
+                      </div>
+                      <div className="divide-y divide-border max-h-64 overflow-y-auto">
+                        <div className="p-3 hover:bg-muted/50 cursor-pointer flex gap-3 items-start">
+                          <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                          <div className="space-y-0.5">
+                            <p className="text-xs text-foreground font-medium">Target BST-002 completed</p>
+                            <p className="text-[11px] text-muted-foreground">All line items have valid supplier mappings.</p>
+                            <span className="text-[9px] text-muted-foreground font-mono">Today, 11:45 AM</span>
+                          </div>
+                        </div>
+                        <div className="p-3 hover:bg-muted/50 cursor-pointer flex gap-3 items-start">
+                          <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
+                          <div className="space-y-0.5">
+                            <p className="text-xs text-foreground font-medium">Approval Pending</p>
+                            <p className="text-[11px] text-muted-foreground">Sourcing Target BST-003 requires buyer sign-off.</p>
+                            <span className="text-[9px] text-muted-foreground font-mono">Yesterday</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* CART ICON & POPOVER */}
+                <div className="relative">
+                  <button
+                    onClick={() => toggleActionPanel("cart")}
+                    className={`idims-action-btn ${activeActionPanel === "cart" ? "bg-accent text-accent-foreground" : ""}`}
+                    title="Requisition Cart"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
                     <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold flex items-center justify-center border border-background">
-                      {cartCount}
+                      2
                     </span>
+                  </button>
+
+                  {activeActionPanel === "cart" && (
+                    <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden text-card-foreground">
+                      <div className="p-3 bg-muted border-b border-border flex justify-between items-center">
+                        <span className="font-semibold text-xs text-foreground">Pending Requisitions (2)</span>
+                        <span className="text-[10px] text-primary font-mono font-semibold">Total: ₹9,600</span>
+                      </div>
+                      <div className="divide-y divide-border max-h-64 overflow-y-auto p-2 space-y-2">
+                        <div className="p-2.5 bg-muted/30 rounded border border-border flex justify-between items-center">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">Epoxy Primer Coating Grade A</p>
+                            <p className="text-[10px] text-muted-foreground">Qty: 2 units • HSN 3208.90</p>
+                          </div>
+                          <span className="text-xs font-mono font-semibold">₹7,600</span>
+                        </div>
+                        <div className="p-2.5 bg-muted/30 rounded border border-border flex justify-between items-center">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">Stainless Steel Flange 150#</p>
+                            <p className="text-[10px] text-muted-foreground">Qty: 1 unit • HSN 7307.21</p>
+                          </div>
+                          <span className="text-xs font-mono font-semibold">₹1,950</span>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-muted border-t border-border">
+                        <button
+                          onClick={() => {
+                            setActiveActionPanel(null);
+                            setIsRequisitionModalOpen(true);
+                          }}
+                          className="w-full py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5"
+                        >
+                          Proceed to Purchase Requisition
+                        </button>
+                      </div>
+                    </div>
                   )}
-                </button>
+                </div>
               </div>
 
               <div className="w-px h-6 bg-border" />
@@ -675,6 +792,11 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
           </div>
         </div>
       )}
+      {/* Purchase Requisition Modal */}
+      <PurchaseRequisitionModal
+        isOpen={isRequisitionModalOpen}
+        onClose={() => setIsRequisitionModalOpen(false)}
+      />
     </>
   );
 };

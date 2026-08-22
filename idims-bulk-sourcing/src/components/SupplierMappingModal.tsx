@@ -46,6 +46,14 @@ export const SupplierMappingModal: React.FC<Props> = ({
     initialLineId ?? target?.lines[0]?.id ?? "",
   );
 
+  React.useEffect(() => {
+    if (initialLineId) {
+      setActiveLineId(initialLineId);
+    } else if (target?.lines.length) {
+      setActiveLineId(target.lines[0].id);
+    }
+  }, [initialLineId, target]);
+
   // Add supplier form state
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
   const [basePrice, setBasePrice] = useState<number | "">("");
@@ -53,11 +61,9 @@ export const SupplierMappingModal: React.FC<Props> = ({
   const [formError, setFormError] = useState<string | null>(null);
   const [completionError, setCompletionError] = useState<string | null>(null);
 
-  if (!isOpen || !target) return null;
-
-  const activeLine: SourcingLineItem | undefined = target.lines.find(
-    (l) => l.id === activeLineId,
-  );
+  const activeLine: SourcingLineItem | undefined = target
+    ? target.lines.find((l) => l.id === activeLineId) ?? target.lines[0]
+    : undefined;
 
   // Landed cost computation: BasePrice × (1 + TaxRate/100)
   const computedLandedCost = useMemo(() => {
@@ -71,6 +77,8 @@ export const SupplierMappingModal: React.FC<Props> = ({
     const mappedIds = new Set(activeLine.mappings.map((m) => m.supplierId));
     return suppliers.filter((s) => !mappedIds.has(s.id));
   }, [suppliers, activeLine]);
+
+  if (!isOpen || !target) return null;
 
   const resetForm = () => {
     setSelectedSupplierId("");
@@ -110,8 +118,8 @@ export const SupplierMappingModal: React.FC<Props> = ({
     resetForm();
   };
 
-  const handleToggleCompletion = (lineId: string) => {
-    const result = toggleLineCompletion(target.id, lineId);
+  const handleToggleCompletion = async (lineId: string) => {
+    const result = await toggleLineCompletion(target.id, lineId);
     if (!result.success) {
       setCompletionError(result.message ?? "Cannot mark line as completed.");
       setTimeout(() => setCompletionError(null), 4000);

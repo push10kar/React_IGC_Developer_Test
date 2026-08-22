@@ -71,6 +71,7 @@ export const AssignTargetModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [startDate, setStartDate] = useState("2026-08-21");
   const [dueDate, setDueDate] = useState("2026-09-15");
   const [sourceType, setSourceType] = useState<SourcingSourceType>("MASTER");
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Product Master Selection state
   const [selectedCatalogSku, setSelectedCatalogSku] = useState("");
@@ -97,6 +98,31 @@ export const AssignTargetModal: React.FC<Props> = ({ isOpen, onClose }) => {
       clarityValue: "",
     },
   ]);
+
+  const resetForm = () => {
+    setTitle("");
+    setAssignedToName(currentUser);
+    setStartDate("2026-08-21");
+    setDueDate("2026-09-15");
+    setSourceType("MASTER");
+    setSelectedCatalogSku("");
+    setFormError(null);
+    setLines([
+      {
+        productName: "",
+        hsnCode: "",
+        targetPrice: 0,
+        sourceType: "MASTER",
+        clarityType: "text",
+        clarityValue: "",
+      },
+    ]);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -173,9 +199,10 @@ export const AssignTargetModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
 
     if (!title.trim()) {
-      alert("Target title is required.");
+      setFormError("Target title is required.");
       return;
     }
 
@@ -183,14 +210,14 @@ export const AssignTargetModal: React.FC<Props> = ({ isOpen, onClose }) => {
       lines.length === 0 ||
       lines.some((l) => !l.productName.trim() || l.targetPrice <= 0)
     ) {
-      alert(
+      setFormError(
         "Every line item must have a valid product name and target price greater than 0.",
       );
       return;
     }
 
     if (new Date(dueDate) <= new Date(startDate)) {
-      alert("Due Date must be later than the Start Date.");
+      setFormError("Due Date must be later than the Start Date.");
       return;
     }
 
@@ -222,6 +249,7 @@ export const AssignTargetModal: React.FC<Props> = ({ isOpen, onClose }) => {
       lines: formattedLines,
     });
 
+    resetForm();
     onClose();
   };
 
@@ -248,12 +276,25 @@ export const AssignTargetModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </div>
           </div>
           <button
-            onClick={onClose}
-            className="p-2 hover:bg-accent rounded-md transition-colors"
+            onClick={handleClose}
+            className="p-2 hover:bg-accent rounded-md transition-colors text-muted-foreground hover:text-foreground"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
+
+        {formError && (
+          <div className="bg-destructive/10 border-b border-destructive/20 px-6 py-2.5 text-destructive text-xs font-semibold flex items-center justify-between">
+            <span>{formError}</span>
+            <button
+              type="button"
+              onClick={() => setFormError(null)}
+              className="hover:opacity-75"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Modal Form */}
         <form
@@ -632,7 +673,7 @@ export const AssignTargetModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <div className="pt-4 border-t border-border flex justify-end gap-3 sticky bottom-0 bg-card">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-5 py-2.5 border border-input rounded-md font-medium text-foreground hover:bg-accent transition-colors"
             >
               Cancel

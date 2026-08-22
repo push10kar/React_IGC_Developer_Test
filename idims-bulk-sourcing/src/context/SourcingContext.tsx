@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, useMemo } from "react";
+import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import type {
   SourcingTarget,
   SupplierMapping,
   Supplier,
 } from "../types/sourcing";
-import { INITIAL_SUPPLIERS, INITIAL_TARGETS } from "../data/mockData";
+import { SourcingApiService } from "../services/api";
 
 interface SourcingStats {
   totalTargets: number;
@@ -18,23 +18,26 @@ interface SourcingContextType {
   suppliers: Supplier[];
   stats: SourcingStats;
   currentUser: string;
+  isLoading: boolean;
+  error: string | null;
   createTarget: (
     data: Omit<SourcingTarget, "id" | "sourcingId" | "status">,
-  ) => void;
+  ) => Promise<void>;
   addSupplierMapping: (
     targetId: string,
     lineId: string,
     mapping: Omit<SupplierMapping, "id" | "effectivePrice" | "mappedAt">,
-  ) => void;
+  ) => Promise<void>;
   removeSupplierMapping: (
     targetId: string,
     lineId: string,
     mappingId: string,
-  ) => void;
+  ) => Promise<void>;
   toggleLineCompletion: (
     targetId: string,
     lineId: string,
-  ) => { success: boolean; message?: string };
+  ) => Promise<{ success: boolean; message?: string }>;
+  refreshData: () => Promise<void>;
 }
 
 const SourcingContext = createContext<SourcingContextType | undefined>(
@@ -45,8 +48,31 @@ export const SourcingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [currentUser] = useState<string>("Rajesh Meshram");
-  const [suppliers] = useState<Supplier[]>(INITIAL_SUPPLIERS);
-  const [targets, setTargets] = useState<SourcingTarget[]>(INITIAL_TARGETS);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [targets, setTargets] = useState<SourcingTarget[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadInitialData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [fetchedTargets, fetchedSuppliers] = await Promise.all([
+        SourcingApiService.fetchTargets(),
+        SourcingApiService.fetchSuppliers(),
+      ]);
+      setTargets(fetchedTargets);
+      setSuppliers(fetchedSuppliers);
+    } catch (err: any) {
+      setError(err.message || "Failed to load sourcing data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
 
   const stats = useMemo<SourcingStats>(() => {
     return {
@@ -59,130 +85,68 @@ export const SourcingProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [targets, currentUser]);
 
-  const createTarget = (
+  const createTarget = async (
     data: Omit<SourcingTarget, "id" | "sourcingId" | "status">,
   ) => {
-    const nextNum = targets.length + 1;
-    const sequentialId = `BST-${nextNum.toString().padStart(3, "0")}`;
-
-    const newTarget: SourcingTarget = {
-      ...data,
-      id: `target-${Date.now()}`,
-      sourcingId: sequentialId,
-      status: "In Progress",
-    };
-
-    setTargets((prev) => [newTarget, ...prev]);
+    setIsLoading(true);
+    try {
+      const newTarget = await SourcingApiService.createTarget(data);
+      setTargets((prev) => [newTarget, ...prev]);
+    } catch (err: any) {
+      setError(err.message || "Failed to create target");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const addSupplierMapping = (
+  const addSupplierMapping = async (
     targetId: string,
     lineId: string,
     mappingData: Omit<SupplierMapping, "id" | "effectivePrice" | "mappedAt">,
   ) => {
-    setTargets((prevTargets) =>
-      prevTargets.map((target) => {
-        if (target.id !== targetId) return target;
-
-        const updatedLines = target.lines.map((line) => {
-          if (line.id !== lineId) return line;
-
-          const effectivePrice = Number(
-            (mappingData.basePrice * (1 + mappingData.taxRate / 100)).toFixed(
-              2,
-            ),
-          );
-
-          const newMapping: SupplierMapping = {
-            ...mappingData,
-            id: `mapping-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-            effectivePrice,
-            mappedAt: new Date().toISOString().split("T")[0],
-          };
-
-          return {
-            ...line,
-            mappings: [...line.mappings, newMapping],
-          };
-        });
-
-        return { ...target, lines: updatedLines };
-      }),
-    );
+    try {
+      const updatedTargets = await SourcingApiService.addSupplierMapping(
+        targetId,
+        lineId,
+        mappingData
+      );
+      setTargets(updatedTargets);
+    } catch (err: any) {
+      setError(err.message || "Failed to add supplier mapping");
+    }
   };
 
-  const removeSupplierMapping = (
+  const removeSupplierMapping = async (
     targetId: string,
     lineId: string,
     mappingId: string,
   ) => {
-    setTargets((prevTargets) =>
-      prevTargets.map((target) => {
-        if (target.id !== targetId) return target;
-
-        const updatedLines = target.lines.map((line) => {
-          if (line.id !== lineId) return line;
-
-          const updatedMappings = line.mappings.filter(
-            (m) => m.id !== mappingId,
-          );
-          const isCompleted =
-            updatedMappings.length === 0 ? false : line.isCompleted;
-
-          return {
-            ...line,
-            mappings: updatedMappings,
-            isCompleted,
-          };
-        });
-
-        const allCompleted = updatedLines.every((l) => l.isCompleted);
-        const status =
-          allCompleted && updatedLines.length > 0 ? "Completed" : "In Progress";
-
-        return { ...target, lines: updatedLines, status };
-      }),
-    );
+    try {
+      const updatedTargets = await SourcingApiService.removeSupplierMapping(
+        targetId,
+        lineId,
+        mappingId
+      );
+      setTargets(updatedTargets);
+    } catch (err: any) {
+      setError(err.message || "Failed to remove supplier mapping");
+    }
   };
 
-  const toggleLineCompletion = (
+  const toggleLineCompletion = async (
     targetId: string,
     lineId: string,
-  ): { success: boolean; message?: string } => {
-    let operationResult: { success: boolean; message?: string } = {
-      success: true,
-    };
-
-    setTargets((prevTargets) =>
-      prevTargets.map((target) => {
-        if (target.id !== targetId) return target;
-
-        const targetLine = target.lines.find((l) => l.id === lineId);
-        if (!targetLine) return target;
-
-        if (!targetLine.isCompleted && targetLine.mappings.length === 0) {
-          operationResult = {
-            success: false,
-            message:
-              "A supplier must be mapped before marking this line as completed.",
-          };
-          return target;
-        }
-
-        const updatedLines = target.lines.map((line) => {
-          if (line.id !== lineId) return line;
-          return { ...line, isCompleted: !line.isCompleted };
-        });
-
-        const allCompleted = updatedLines.every((l) => l.isCompleted);
-        const status =
-          allCompleted && updatedLines.length > 0 ? "Completed" : "In Progress";
-
-        return { ...target, lines: updatedLines, status };
-      }),
-    );
-
-    return operationResult;
+  ): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const updatedTargets = await SourcingApiService.toggleLineCompletion(
+        targetId,
+        lineId
+      );
+      setTargets(updatedTargets);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, message: err.message };
+    }
   };
 
   return (
@@ -192,10 +156,13 @@ export const SourcingProvider: React.FC<{ children: React.ReactNode }> = ({
         suppliers,
         stats,
         currentUser,
+        isLoading,
+        error,
         createTarget,
         addSupplierMapping,
         removeSupplierMapping,
         toggleLineCompletion,
+        refreshData: loadInitialData,
       }}
     >
       {children}
