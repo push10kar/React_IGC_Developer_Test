@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { PurchaseRequisitionModal } from "./PurchaseRequisitionModal";
+import { useSourcing } from "../context/SourcingContext";
 
 interface IdimsNavbarProps {
   onSearchChange?: (query: string) => void;
@@ -52,9 +53,10 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+  const { setActiveBranch: setSourcingActiveBranch } = useSourcing();
   const [search, setSearch] = useState("");
   const [isBranchOpen, setIsBranchOpen] = useState(false);
-  const [activeBranch, setActiveBranch] = useState("All branch");
+  const [activeBranchName, setActiveBranchName] = useState("All branch");
   const [branchTag, setBranchTag] = useState("ALL");
   const [isBrandTheme, setIsBrandTheme] = useState(
     () =>
@@ -249,7 +251,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                     <Building2 className="w-4 h-4" />
                   </div>
                   <div className="idims-branch-meta">
-                    <span className="idims-branch-name">{activeBranch}</span>
+                    <span className="idims-branch-name">{activeBranchName}</span>
                     <span className="idims-branch-tag">{branchTag}</span>
                   </div>
                   <ChevronDown className="w-3.5 h-3.5 idims-branch-chev ml-auto" />
@@ -265,12 +267,13 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                         <div
                           key={b.id}
                           onClick={() => {
-                            setActiveBranch(b.name);
+                            setActiveBranchName(b.name);
                             setBranchTag(b.tag);
+                            setSourcingActiveBranch(b.tag);
                             setIsBranchOpen(false);
                           }}
                           className={`idims-branch-item ${
-                            activeBranch === b.name ? "active" : ""
+                            activeBranchName === b.name ? "active" : ""
                           }`}
                         >
                           <div className="w-8 h-8 rounded-md bg-muted text-foreground font-semibold text-xs flex items-center justify-center flex-shrink-0">
@@ -289,7 +292,7 @@ export const IdimsNavbar: React.FC<IdimsNavbarProps> = ({
                               {b.sub}
                             </p>
                           </div>
-                          {activeBranch === b.name && (
+                          {activeBranchName === b.name && (
                             <Check className="w-4 h-4 text-foreground flex-shrink-0" />
                           )}
                         </div>

@@ -57,4 +57,5 @@ export interface SourcingTarget {
   dueDate: string;
   status: SourcingTargetStatus;
   lines: SourcingLineItem[];
+  branch?: "MH" | "DL" | "KA" | "GJ" | "ALL";
 }

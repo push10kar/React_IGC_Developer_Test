@@ -18,6 +18,8 @@ interface SourcingContextType {
   suppliers: Supplier[];
   stats: SourcingStats;
   currentUser: string;
+  activeBranch: string;
+  setActiveBranch: (branchTag: string) => void;
   isLoading: boolean;
   error: string | null;
   createTarget: (
@@ -53,6 +55,8 @@ export const SourcingProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [activeBranch, setActiveBranch] = useState<string>("ALL");
+
   const loadInitialData = async () => {
     setIsLoading(true);
     setError(null);
@@ -74,16 +78,24 @@ export const SourcingProvider: React.FC<{ children: React.ReactNode }> = ({
     loadInitialData();
   }, []);
 
+  const filteredTargets = useMemo(() => {
+    if (activeBranch === "ALL") return targets;
+    return targets.filter((t) => t.branch === activeBranch || !t.branch);
+  }, [targets, activeBranch]);
+
   const stats = useMemo<SourcingStats>(() => {
     return {
-      totalTargets: targets.length,
-      assignedTargets: targets.filter((t) => t.assignedToName === currentUser)
+      totalTargets: filteredTargets.length,
+      assignedTargets: filteredTargets.filter(
+        (t) => t.assignedToName === currentUser,
+      ).length,
+      completedTargets: filteredTargets.filter((t) => t.status === "Completed")
         .length,
-      completedTargets: targets.filter((t) => t.status === "Completed").length,
-      inProgressTargets: targets.filter((t) => t.status === "In Progress")
-        .length,
+      inProgressTargets: filteredTargets.filter(
+        (t) => t.status === "In Progress",
+      ).length,
     };
-  }, [targets, currentUser]);
+  }, [filteredTargets, currentUser]);
 
   const createTarget = async (
     data: Omit<SourcingTarget, "id" | "sourcingId" | "status">,
@@ -152,10 +164,12 @@ export const SourcingProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <SourcingContext.Provider
       value={{
-        targets,
+        targets: filteredTargets,
         suppliers,
         stats,
         currentUser,
+        activeBranch,
+        setActiveBranch,
         isLoading,
         error,
         createTarget,
