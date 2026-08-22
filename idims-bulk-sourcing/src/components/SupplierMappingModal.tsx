@@ -174,9 +174,9 @@ export const SupplierMappingModal: React.FC<Props> = ({
         </div>
 
         {/* ── BODY: SPLIT LAYOUT ── */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
           {/* LEFT — Line Navigator */}
-          <div className="w-64 flex-shrink-0 border-r border-border bg-sidebar text-sidebar-foreground flex flex-col">
+          <div className="w-full md:w-64 flex-shrink-0 border-b md:border-b-0 md:border-r border-border bg-sidebar text-sidebar-foreground flex flex-col max-h-48 md:max-h-none">
             <div className="px-4 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-sidebar-border">
               Line Items ({totalLines})
             </div>

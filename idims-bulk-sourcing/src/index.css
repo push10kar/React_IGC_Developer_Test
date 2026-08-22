@@ -598,3 +598,52 @@ html.brand .idims-theme-toggle::after {
     transform: translateY(0);
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Responsive & UI/UX Enhancements                                            */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .idims-nav {
+    height: auto;
+    padding: 8px 12px;
+  }
+
+  .idims-row-top {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .idims-search {
+    width: 100%;
+    max-width: 100%;
+    order: 3;
+  }
+
+  .idims-branch-btn {
+    width: 200px;
+  }
+
+  .idims-profile-name {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .idims-branch-btn {
+    width: 140px;
+  }
+
+  .idims-branch-meta {
+    display: none;
+  }
+
+  .idims-divider {
+    display: none;
+  }
+
+  .idims-theme-switch span {
+    display: none;
+  }
+}
+
