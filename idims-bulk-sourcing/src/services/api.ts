@@ -15,7 +15,21 @@ export class SourcingApiService {
     if (USE_MOCK_API) {
       await delay();
       const saved = localStorage.getItem("idims_sourcing_targets");
-      return saved ? JSON.parse(saved) : INITIAL_TARGETS;
+      if (saved) {
+        try {
+          const parsed: SourcingTarget[] = JSON.parse(saved);
+          if (
+            parsed.length > 0 &&
+            ["HEALTHCARE", "AGROTECH", "CORPORATION"].includes(parsed[0].branch || "")
+          ) {
+            return parsed;
+          }
+        } catch (e) {
+          console.warn("Invalid localStorage target cache", e);
+        }
+      }
+      localStorage.setItem("idims_sourcing_targets", JSON.stringify(INITIAL_TARGETS));
+      return INITIAL_TARGETS;
     }
     const response = await fetch(`${API_BASE_URL}/api/sourcing/targets`);
     if (!response.ok) throw new Error("Failed to fetch sourcing targets");
